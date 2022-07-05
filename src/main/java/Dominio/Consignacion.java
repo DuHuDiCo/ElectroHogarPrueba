@@ -31,6 +31,7 @@ public class Consignacion {
     private Date fecha_obligacion;
     private int id_sede;
     private String nombre_sede;
+    private int id_observacion;
 
     public Consignacion() {
         
@@ -75,7 +76,7 @@ public class Consignacion {
     
     
 
-    public Consignacion(int idConsignacion, String num_recibo, Date fecha_creacion, Date fecha_pago, float valor, int id_files, int id_actualizacion, int id_usuario, int id_plataforma, int id_obligacion) {
+    public Consignacion(int idConsignacion, String num_recibo, Date fecha_creacion, Date fecha_pago, float valor, int id_files, int id_actualizacion, int id_usuario, int id_plataforma, int id_obligacion, int id_observacion) {
         this.idConsignacion = idConsignacion;
         this.num_recibo = num_recibo;
         this.fecha_creacion = fecha_creacion;
@@ -86,6 +87,7 @@ public class Consignacion {
         this.id_usuario = id_usuario;
         this.id_plataforma = id_plataforma;
         this.id_obligacion = id_obligacion;
+        this.id_observacion = id_observacion;
     }
 
     public Consignacion(int idConsignacion, String num_recibo, Date fecha_creacion, Date fecha_pago, float valor, DateTime fecha_actualizacion, String nombre_estado, String nombre_plataforma, String nombre_titular, String nombre_sede) {
@@ -176,6 +178,14 @@ public class Consignacion {
 
     public void setNumero_documento(String numero_documento) {
         this.numero_documento = numero_documento;
+    }
+
+    public int getId_observacion() {
+        return id_observacion;
+    }
+
+    public void setId_observacion(int id_observacion) {
+        this.id_observacion = id_observacion;
     }
     
     

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +31,8 @@ import org.joda.time.LocalDate;
 
 @WebServlet(urlPatterns = {"/ServletControladorConsignaciones"})
 public class ServletControladorConsignaciones extends HttpServlet {
+
+    
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
@@ -134,7 +137,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
                     }
                 }
                 break;
-               
+
                 case "consignacionesDevueltas": {
                     try {
                         this.consignacionesDevueltas(req, resp);
@@ -325,9 +328,27 @@ public class ServletControladorConsignaciones extends HttpServlet {
 
     private void ConsignacionTemporal(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
         int id_consignacion = Integer.parseInt(req.getParameter("idConsignacion"));
+        String mensaje = req.getParameter("observacion");
+
+        HttpSession session = req.getSession(true);
+        String email = (String) session.getAttribute("usuario");
+        int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+
         Consignacion conTemp = new DaoConsignaciones().listarConsignacionesById(id_consignacion);
 
         int guardarConsignacionesTemp = new DaoConsignaciones().guardarConsigTemp(conTemp);
+        if (mensaje != null) {
+
+            Observaciones obser = new Observaciones();
+            obser.setObservacion(mensaje);
+            obser.setId_usuario(id_usuario);
+            obser.setId_consignacion(id_consignacion);
+
+            int observacionTemporal = new DaoObservacion().observacionTemporal(obser);
+            
+            int actualizarConsigObser = new DaoConsignaciones().actualizarObservacionConsignacionTemporal(observacionTemporal, conTemp.getIdConsignacion());
+            
+        }
 
         resp.setContentType("text/plain");
 
@@ -339,12 +360,13 @@ public class ServletControladorConsignaciones extends HttpServlet {
 
     private void cancelarCambios(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
         int eliminarTempo = new DaoConsignaciones().eliminarConsigTemp();
+        int eliminarObservaTemp = new DaoObservacion().eliminarObserTemp();
 
         resp.setContentType("text/plain");
 
         PrintWriter out = resp.getWriter();
 
-        out.print(eliminarTempo);
+        out.print(eliminarObservaTemp);
         out.flush();
 
     }
@@ -355,11 +377,25 @@ public class ServletControladorConsignaciones extends HttpServlet {
         String email = (String) sesion.getAttribute("usuario");
         System.out.println(email);
         int confirmacion = 0;
+        String estado = "Comprobado";
 
         for (Consignacion consig : consignaciones) {
+
+            if (consig.getId_observacion() != 0) {
+
+                int id_observacion = consig.getId_observacion();
+                Observaciones obs = new DaoObservacion().obtenerObservacionTemporalById(id_observacion);
+                if(obs.getError() == null){
+                    int crearObservacionTablaObservacion = new DaoObservacion().guardarObservacion(obs);
+                    int actualizarObservacionConsig = new DaoConsignaciones().actualizarObservacionConsignacion(crearObservacionTablaObservacion, consig.getIdConsignacion());
+                    estado = "Devuelta";
+                }
+
+            }
             //obtenemos datos para guardar los datos de la actualizacion
             int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
-            int id_estado = new DaoEstados().obtenerIdEstado("Comprobado");
+            
+            int id_estado = new DaoEstados().obtenerIdEstado(estado);
 
             Actualizacion actu = new Actualizacion(id_estado, id_usuario);
             //guardamos la actualizacion
@@ -382,11 +418,12 @@ public class ServletControladorConsignaciones extends HttpServlet {
             Archivo file = new Archivo(nombreArchivo, ruta, fechaHora, id_usuario);
             int guardarFile = new DaoFiles().guardarArchivoReportes(file);
             int eliminarTemp = new DaoConsignaciones().eliminarConsigTemp();
+            int eliminarObservacionesTemp = new DaoObservacion().eliminarObserTemp();
             resp.setContentType("text/plain");
 
             PrintWriter out = resp.getWriter();
 
-            out.print(eliminarTemp);
+            out.print(eliminarObservacionesTemp);
             out.flush();
         } else {
             resp.setContentType("text/plain");
@@ -559,7 +596,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
         out.print(congs.size());
         out.flush();
     }
-    
+
     private void consignacionesPendientes(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
         List<Consignacion> congs = new DaoConsignaciones().listarConsignacionesByEstado("Pendiente");
         System.out.println(congs.size());
@@ -570,8 +607,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
         out.print(congs.size());
         out.flush();
     }
-    
-    
+
     private void consignacionesComprobadas(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
         List<Consignacion> congs = new DaoConsignaciones().listarConsignacionesByEstado("Comprobado");
         System.out.println(congs.size());
@@ -582,7 +618,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
         out.print(congs.size());
         out.flush();
     }
-    
+
     private void consignacionesAplicadas(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
         List<Consignacion> congs = new DaoConsignaciones().listarConsignacionesByEstado("Aplicado");
         System.out.println(congs.size());

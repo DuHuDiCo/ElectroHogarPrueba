@@ -29,7 +29,7 @@ function listarConsignacionesContabilidad() {
         var contador = 1;
 
         $.each(json, function (key, value) {
-            var devolver = '<a href="#" id="btn_devolver" onclick="abrirModal(' + value.idConsignacion + ');" class="btn btn-warning btn-sm"><i class="fas fa-backward"></i></a>';
+            var devolver = '<a href="#" id="btn_devolver' + value.idConsignacion + '" onclick="abrirModal(' + value.idConsignacion + ', this.id);" class="btn btn-warning btn-sm"><i class="fas fa-backward"></i></a>';
             //var modalDevolver = '<button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#staticBackdrop"><i class="fas fa-backward"></i></button>';
             var obser = '<a href="#" id="btn_observa" onclick="abrirModalObservacionesContabilidad(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
             var comprobar = '<td><a href="#" id="btn_comprobar" onclick="comprobarConsignacion(' + value.idConsignacion + ');" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + devolver + obser + '</td>';
@@ -54,10 +54,7 @@ function listarConsignacionesContabilidad() {
 
 
 
-function abrirModal(idConsignacion, accion) {
-
-
-
+function abrirModal(idConsignacion, id) {
 
     $('#staticBackdrop').modal('show');
 
@@ -74,19 +71,15 @@ function abrirModal(idConsignacion, accion) {
             observa.focus();
         } else {
 
-            devolverConsignacion(observa, idConsignacion);
+            devolverConsignacion(idConsignacion, id, observa);
 
 
         }
 
     });
 
-
-
-
-
 }
-function devolverConsignacion(mensaje, idConsignacion) {
+function devolverConsignacion(idConsignacion, id, mensaje) {
     validarSession();
 
     var datos = {};
@@ -94,17 +87,17 @@ function devolverConsignacion(mensaje, idConsignacion) {
     datos.observacion = mensaje;
 
 
-
     $.ajax({
         method: "POST",
-        url: "ServletControladorConsignaciones?accion=devolverConsignaciones",
+        url: "ServletControladorConsignaciones?accion=ConsignacionTemporal",
         data: datos,
         dataType: 'JSON'
 
     }).done(function (data) {
-        var datos = data;
+        var resp = data;
 
-        if (datos > 0) {
+        if (resp > 0) {
+           
             Swal.fire({
                 position: 'top-end',
                 icon: 'success',
@@ -112,8 +105,15 @@ function devolverConsignacion(mensaje, idConsignacion) {
                 showConfirmButton: false,
                 timer: 2000
             });
+            document.getElementById('observacionDevolucion').value = "";
             $('#staticBackdrop').modal('hide');
-            setTimeout(recargarPagina, 2000);
+
+            $("#" + id).empty();
+            document.getElementById(id).outerHTML = '<a href="#"  class="btn btn-warning btn-sm" ><i class="fas fa-ban"></i></a></td>';
+
+            var botonGroup = '<a href="#" class="btn btn-primary" onclick="guardarCambios();">Guardar Cambios</a> <a href="#" class="btn btn-danger" onclick="cancelarCambios();">Cancelar Cambios</a>';
+            document.getElementById('btn_group').innerHTML = botonGroup;
+
         } else {
             Swal.fire({
                 icon: 'error',
@@ -136,6 +136,9 @@ function devolverConsignacion(mensaje, idConsignacion) {
 
     });
 }
+
+
+
 
 var select = document.getElementById('sltEstadoConsignacionContabilidad');
 
