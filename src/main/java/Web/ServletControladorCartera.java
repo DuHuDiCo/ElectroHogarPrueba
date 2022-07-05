@@ -124,9 +124,9 @@ public class ServletControladorCartera extends HttpServlet {
             int id_obligacionCreada = new DaoObligaciones().obtenerIdObligacionCreada(cedulaCliente);
 
             //guardamos la consignacion con el nuevo cliente guardado
-            int SaveConsig = guardarConsignacion(part, fecha_creacion, id_usuario, id_estado, num_recibo, fecha_pago, valor, plataforma, id_obligacionCreada);
+            int idConsignacion = guardar_Consignacion(part, fecha_creacion, id_usuario, id_estado, num_recibo, fecha_pago, valor, plataforma, id_obligacionCreada);
 
-            String respuesta = Integer.toString(SaveConsig);
+            String respuesta = Integer.toString(idConsignacion);
             resp.setContentType("text/plain");
 
             PrintWriter out = resp.getWriter();
@@ -136,7 +136,7 @@ public class ServletControladorCartera extends HttpServlet {
         } else {
             if (isExtension(part.getSubmittedFileName(), extens)) {
                 
-                int SaveConsig = guardarConsignacion(part, fecha_creacion, id_usuario, id_estado, num_recibo, fecha_pago, valor, plataforma, id_obligacion);
+                int SaveConsig = guardar_Consignacion(part, fecha_creacion, id_usuario, id_estado, num_recibo, fecha_pago, valor, plataforma, id_obligacion);
                
                
                 resp.setContentType("text/plain");
@@ -151,7 +151,7 @@ public class ServletControladorCartera extends HttpServlet {
 
     }
 
-    private int guardarConsignacion(Part part, Date fecha_creacion, int id_usuario, int id_estado, String num_recibo, Date fecha_pago, float valor, int plataforma, int id_obligacion) throws ClassNotFoundException, SQLException {
+    private int guardar_Consignacion(Part part, Date fecha_creacion, int id_usuario, int id_estado, String num_recibo, Date fecha_pago, float valor, int plataforma, int id_obligacion) throws ClassNotFoundException, SQLException {
         String name = part.getSubmittedFileName();
         String photo = saveFile(part, uploads);
 
@@ -163,12 +163,12 @@ public class ServletControladorCartera extends HttpServlet {
         //Guardamos la primera actualizacion(por defecto:pendiente)
         Actualizacion actu = new Actualizacion(fecha_creacion, id_estado, id_usuario);
         int upd = new DaoCartera().guardarActualizacion(actu);
-        int idActu = new DaoCartera().obtenerIdActualizacion();
+        
 
         //Guardamos la consignacion en la BD
-        Consignacion consig = new Consignacion(num_recibo, fecha_creacion, fecha_pago, valor, idFile, idActu, id_usuario, plataforma, id_obligacion);
-        int SaveConsig = new DaoCartera().guardarConsignacion(consig);
-        return SaveConsig;
+        Consignacion consig = new Consignacion(num_recibo, fecha_creacion, fecha_pago, valor, idFile, upd, id_usuario, plataforma, id_obligacion);
+        int idConsignacion = new DaoCartera().guardarConsignacion(consig);
+        return idConsignacion;
     }
 
     private int obtenerIdEstado(String dato) throws ClassNotFoundException, SQLException {

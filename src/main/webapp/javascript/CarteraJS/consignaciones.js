@@ -36,7 +36,7 @@ function abrirModalObservaciones() {
 }
 
 
-function crearObservacion() {
+function guardarConsignacionConObservacion() {
     validarSession();
     var obser = document.getElementById('observacionGuardarConsig').value;
     if (obser === "") {
@@ -47,38 +47,29 @@ function crearObservacion() {
             footer: '<a href="">Why do I have this issue?</a>'
         });
     } else {
-        guardarConsig();
-
-        var datos = {};
-
-        datos.observacion = obser;
+        validarSession();
+        var form = document.getElementById('formConsignacion');
+        var formData = new FormData(form);
 
 
         $.ajax({
             method: "POST",
-            url: "ServletObservaciones?accion=guardarObservacion",
-            data: datos,
-            dataType: 'JSON'
+            url: "ServletControladorCartera?accion=guardarConsignacion",
+            data: formData,
+            processData: false,
+            contentType: false
 
         }).done(function (data) {
 
-            var datos = data;
+            var idConsignacion = data;
+
+            
 
 
-            window.location.reload();
-
-            if (datos !== 0) {
-                Swal.fire({
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Consignacion Guardada Exitosamente',
-                    showConfirmButton: false,
-                    timer: 2000
-
-
-                });
-
-                roles(datos.nombre_rol);
+            if (idConsignacion !== 0) {
+              
+                crearObservacion(obser, idConsignacion);
+                
 
 
 
@@ -92,7 +83,7 @@ function crearObservacion() {
                 });
             }
 
-            window.location.reload();
+            
 
 
             // imprimimos la respuesta
@@ -103,8 +94,64 @@ function crearObservacion() {
 
         });
 
+
+       
+
+
     }
 }
+
+function crearObservacion(obser, idConsignacion) {
+    var datos = {};
+    datos.observacion = obser;
+    datos.idConsignacion = idConsignacion;
+    
+    $.ajax({
+        method: "POST",
+        url: "ServletObservaciones?accion=guardarObservacion",
+        data: datos,
+        dataType: 'JSON'
+
+    }).done(function (data) {
+
+        var dato = data;
+
+        if (dato !== 0) {
+            Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: 'Consignacion Guardada Exitosamente',
+                showConfirmButton: false,
+                timer: 2000
+
+
+            });
+
+            setTimeout(recargarPaginaCartera, 2000);
+
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al guardar la consignacion',
+                text: 'No se logro guardar la consignacion, por favor revise bien la informacion o reporte el error',
+                footer: '<a href="">Why do I have this issue?</a>'
+            });
+        }
+
+        
+
+
+        // imprimimos la respuesta
+    }).fail(function () {
+
+        window.location.replace("login.html");
+    }).always(function () {
+
+    });
+}
+
+
+
 
 
 function noCrearObservacion() {
@@ -130,7 +177,7 @@ function guardarConsig() {
         var datos = data;
 
 
-        window.location.reload();
+
 
         if (datos !== 0) {
             Swal.fire({
@@ -686,7 +733,6 @@ function actualizarConsignacion() {
 function recargarPaginaCartera() {
     window.location.reload();
 }
-
 
 
 
