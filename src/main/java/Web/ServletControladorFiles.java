@@ -47,15 +47,22 @@ public class ServletControladorFiles extends HttpServlet {
         String accion = req.getParameter("accion");
         if (accion != null) {
             switch (accion) {
-                case "listarFiles":
-                {
+                case "listarFiles": {
                     try {
                         this.listarFiles(req, resp);
                     } catch (ClassNotFoundException ex) {
                         Logger.getLogger(ServletControladorFiles.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                    break;
+                break;
+                case "obtenerRutaImagen": {
+                    try {
+                        this.obtenerRutaImagen(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletControladorFiles.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
 
                 default:
                     this.accionDefaul(req, resp);
@@ -100,7 +107,6 @@ public class ServletControladorFiles extends HttpServlet {
             Archivo file = new Archivo(name, photo, fecha, id_usuario);
             int save = new DaoFiles().guardarArchivoTxt(file);
 
-           
             //leemos el archivo y guardamos en base datos
             int leerArchivo = leerTxt(name);
 
@@ -232,11 +238,8 @@ public class ServletControladorFiles extends HttpServlet {
 
     private void listarFiles(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
         List<Archivo> listaFiles = new DaoFiles().listarFiles();
-        
-        
-        Gson gson = new Gson();
 
-        
+        Gson gson = new Gson();
 
         String json = gson.toJson(listaFiles);
         resp.setContentType("application/json");
@@ -257,7 +260,22 @@ public class ServletControladorFiles extends HttpServlet {
             resp.sendRedirect("login.html");
         }
     }
-    
-     
+
+    private void obtenerRutaImagen(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, ClassNotFoundException, SQLException, IOException {
+        int idConsignacion = Integer.parseInt(req.getParameter("idConsignacion"));
+
+        int idFileImagen = new DaoFiles().obtenerIdFileImg(idConsignacion);
+        
+        String nombreArchivo = new DaoFiles().obtenerNombreFile(idFileImagen);
+        String ruta = "archivos/img/" + nombreArchivo;
+
+        resp.setContentType("text/plain");
+
+        PrintWriter out = resp.getWriter();
+
+        out.print(ruta);
+        out.flush();
+
+    }
 
 }

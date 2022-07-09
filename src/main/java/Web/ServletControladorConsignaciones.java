@@ -32,8 +32,6 @@ import org.joda.time.LocalDate;
 @WebServlet(urlPatterns = {"/ServletControladorConsignaciones"})
 public class ServletControladorConsignaciones extends HttpServlet {
 
-    
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         String accion = req.getParameter("accion");
@@ -345,9 +343,9 @@ public class ServletControladorConsignaciones extends HttpServlet {
             obser.setId_consignacion(id_consignacion);
 
             int observacionTemporal = new DaoObservacion().observacionTemporal(obser);
-            
+
             int actualizarConsigObser = new DaoConsignaciones().actualizarObservacionConsignacionTemporal(observacionTemporal, conTemp.getIdConsignacion());
-            
+
         }
 
         resp.setContentType("text/plain");
@@ -381,30 +379,59 @@ public class ServletControladorConsignaciones extends HttpServlet {
 
         for (Consignacion consig : consignaciones) {
 
-            if (consig.getId_observacion() != 0) {
+            if (consig.getId_observacion() == 0) {
+                
+                //obtenemos datos para guardar los datos de la actualizacion
+                int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
 
+                int id_estado = new DaoEstados().obtenerIdEstado(estado);
+
+                Actualizacion actu = new Actualizacion(id_estado, id_usuario);
+                //guardamos la actualizacion
+                int guardarActu = new DaoActualizacion().guardarActualizacion(actu);
+                
+                //enviamos el id de la actualizacion a la consignacion con el idConsignacion correspondiente
+                int actualizarConsig = new DaoConsignaciones().actualizarEstadoConsig(guardarActu, consig.getIdConsignacion());
+                confirmacion = actualizarConsig;
+
+            } else {
                 int id_observacion = consig.getId_observacion();
                 Observaciones obs = new DaoObservacion().obtenerObservacionTemporalById(id_observacion);
-                if(obs.getError() == null){
+                if (obs.getError() == null) {
                     int crearObservacionTablaObservacion = new DaoObservacion().guardarObservacion(obs);
                     int actualizarObservacionConsig = new DaoConsignaciones().actualizarObservacionConsignacion(crearObservacionTablaObservacion, consig.getIdConsignacion());
                     estado = "Devuelta";
+
+                    int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+
+                    int id_estado = new DaoEstados().obtenerIdEstado(estado);
+
+                    Actualizacion actu = new Actualizacion(id_estado, id_usuario);
+                    //guardamos la actualizacion
+                    int guardarActu = new DaoActualizacion().guardarActualizacion(actu);
+                    
+                    
+                    //enviamos el id de la actualizacion a la consignacion con el idConsignacion correspondiente
+                    int actualizarConsig = new DaoConsignaciones().actualizarEstadoConsig(guardarActu, consig.getIdConsignacion());
+                    confirmacion = actualizarConsig;
+                } else {
+                    
+                    //obtenemos datos para guardar los datos de la actualizacion
+                    int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+
+                    int id_estado = new DaoEstados().obtenerIdEstado(estado);
+
+                    Actualizacion actu = new Actualizacion(id_estado, id_usuario);
+                    //guardamos la actualizacion
+                    int guardarActu = new DaoActualizacion().guardarActualizacion(actu);
+                   
+                    //enviamos el id de la actualizacion a la consignacion con el idConsignacion correspondiente
+                    int actualizarConsig = new DaoConsignaciones().actualizarEstadoConsig(guardarActu, consig.getIdConsignacion());
+                    confirmacion = actualizarConsig;
+
                 }
-
             }
-            //obtenemos datos para guardar los datos de la actualizacion
-            int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
-            
-            int id_estado = new DaoEstados().obtenerIdEstado(estado);
 
-            Actualizacion actu = new Actualizacion(id_estado, id_usuario);
-            //guardamos la actualizacion
-            int guardarActu = new DaoActualizacion().guardarActualizacion(actu);
-            //obtenemos el id de esa actualizacion
-            int id_actuazliacion = new DaoActualizacion().obtenerIdActualizacion();
-            //enviamos el id de la actualizacion a la consignacion con el idConsignacion correspondiente
-            int actualizarConsig = new DaoConsignaciones().actualizarEstadoConsig(id_actuazliacion, consig.getIdConsignacion());
-            confirmacion = actualizarConsig;
         }
 
         if (confirmacion == 1) {
@@ -423,7 +450,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
 
             PrintWriter out = resp.getWriter();
 
-            out.print(eliminarObservacionesTemp);
+            out.print(eliminarTemp);
             out.flush();
         } else {
             resp.setContentType("text/plain");
