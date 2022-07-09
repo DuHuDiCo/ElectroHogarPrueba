@@ -39,6 +39,33 @@ public class ServletUsuarios extends HttpServlet {
                 }
                 
                 break;
+                case "desactivarUsuario":  {
+                try {
+                    this.desactivarUsuario(req, resp);
+                } catch (ClassNotFoundException | SQLException ex) {
+                    Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                }
+                
+                break;
+                case "activarUsuario":  {
+                try {
+                    this.activarUsuario(req, resp);
+                } catch (ClassNotFoundException | SQLException ex) {
+                    Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                }
+                
+                break;
+                case "obtenerUsuarioById":  {
+                try {
+                    this.obtenerUsuarioById(req, resp);
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                }
+                
+                break;
 
 
                 default:
@@ -114,6 +141,39 @@ public class ServletUsuarios extends HttpServlet {
         out.print(json);
         out.flush();
         
+    }
+
+    private void desactivarUsuario(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        int idUsuario = Integer.parseInt(req.getParameter("idUsuario"));
+        int desactivarUsuario = new DaoUsuarios().desactivarUsuario(idUsuario);
+        
+        resp.setContentType("text/plain");
+        PrintWriter out = resp.getWriter();
+        out.print(desactivarUsuario);
+        out.flush();
+    }
+    
+    private void activarUsuario(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        int idUsuario = Integer.parseInt(req.getParameter("idUsuario"));
+        int desactivarUsuario = new DaoUsuarios().activarUsuario(idUsuario);
+        
+        resp.setContentType("text/plain");
+        PrintWriter out = resp.getWriter();
+        out.print(desactivarUsuario);
+        out.flush();
+    }
+
+    private void obtenerUsuarioById(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
+        int idUsuario = Integer.parseInt(req.getParameter("idUsuario"));
+        
+        Usuario user = new DaoUsuarios().obtenerUsuarioById(idUsuario);
+        
+        Gson gson = new Gson();
+        String json = gson.toJson(user);
+        resp.setContentType("application/json");
+        PrintWriter out = resp.getWriter();
+        out.print(json);
+        out.flush();
     }
 
 }

@@ -134,7 +134,7 @@ public class ServletControlador extends HttpServlet {
             //obtenemos los datos de la base datos
             Usuario user = new Dao().iniciarSesion(email);
 
-            if (user.getEmail().equals(email) && user.getPassword().equals(pass)) {
+            if (user.getEmail().equals(email) && user.getPassword().equals(pass) && user.getStatus() == 1) {
                 // contraseña y correo correctos, inicio de sesion y se envian los datos de estado de conexion y la ultima sesion
                 String conexion = "Conectado";
 
