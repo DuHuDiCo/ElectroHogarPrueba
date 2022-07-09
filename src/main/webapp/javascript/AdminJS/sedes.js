@@ -235,8 +235,6 @@ function actualizarSede() {
         });
     }
 
-
-
 }
 
 function recargarPagina() {

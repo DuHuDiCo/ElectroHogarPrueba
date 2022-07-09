@@ -13,9 +13,9 @@ public class DaoUsuarios {
     private static final String SQL_SELECT_USUARIOS = "SELECT usuario.idUsuario, usuario.nombre, usuario.email, usuario.n_documento, usuario.telefono, usuario.estado_conexion, usuario.status, usuario.ultima_sesion, sede.nombre_sede FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede";
     private static final String SQL_SELEC_IDUSUARIO = "SELECT idUsuario FROM usuario WHERE email = ?";
     private static final String SQL_SELECT_SEDEUSUARIO = "SELECT sede.nombre_sede FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede WHERE usuario.email = ?";
-    private static final String SQL_SELECT_DATOSPERFIL = "SELECT nombre, email, telefono FROM usuario WHERE idUsuario = ?";
-    private static final String SQL_UPDATE_ACTUALIZARPERFIL = "UPDATE usuario SET nombre = ?, email = ?, telefono = ? WHERE idUsuario = ?";
-    private static final String SQL_UPDATE_ACTUALIZARPERFILCOMPLETO = "UPDATE usuario SET nombre = ?, email = ?, telefono = ?, password = ? WHERE idUsuario = ?";
+    private static final String SQL_SELECT_DATOSPERFIL = "SELECT nombre, n_documento, email, telefono FROM usuario WHERE idUsuario = ?";
+    private static final String SQL_UPDATE_ACTUALIZARPERFIL = "UPDATE usuario SET nombre = ?, n_documento = ?, email = ?, telefono = ? WHERE idUsuario = ?";
+    private static final String SQL_UPDATE_ACTUALIZARPERFILCOMPLETO = "UPDATE usuario SET nombre = ?, n_documento = ? ,email = ?, telefono = ?, password = ? WHERE idUsuario = ?";
 
     public List<Usuario> listarUsuarios() throws ClassNotFoundException, SQLException {
         Connection con = null;
@@ -129,11 +129,13 @@ public class DaoUsuarios {
 
             while (rs.next()) {
                 String nombre = rs.getString("nombre");
+                String cedula = rs.getString("n_documento");
                 String email = rs.getString("email");
                 String telefono = rs.getString("telefono");
 
                 user = new Usuario();
                 user.setNombre(nombre);
+                user.setN_documento(cedula);
                 user.setEmail(email);
                 user.setTelefonoUser(telefono);
 
@@ -160,9 +162,10 @@ public class DaoUsuarios {
             con = Conexion.getConnection();
             stmt = con.prepareStatement(SQL_UPDATE_ACTUALIZARPERFIL);
             stmt.setString(1, user.getNombre());
-            stmt.setString(2, user.getEmail());
-            stmt.setString(3, user.getTelefono());
-            stmt.setInt(4, user.getIdUsuario());
+            stmt.setString(2, user.getN_documento());
+            stmt.setString(3, user.getEmail());
+            stmt.setString(4, user.getTelefono());
+            stmt.setInt(5, user.getIdUsuario());
 
             rown = stmt.executeUpdate();
 
@@ -185,10 +188,11 @@ public class DaoUsuarios {
             con = Conexion.getConnection();
             stmt = con.prepareStatement(SQL_UPDATE_ACTUALIZARPERFILCOMPLETO);
             stmt.setString(1, user.getNombre());
-            stmt.setString(2, user.getEmail());
-            stmt.setString(3, user.getTelefono());
-            stmt.setString(4, user.getPassword());
-            stmt.setInt(5, user.getIdUsuario());
+            stmt.setString(2, user.getN_documento());
+            stmt.setString(3, user.getEmail());
+            stmt.setString(4, user.getTelefono());
+            stmt.setString(5, user.getPassword());
+            stmt.setInt(6, user.getIdUsuario());
 
             rown = stmt.executeUpdate();
 
