@@ -1,6 +1,5 @@
 package Web;
 
-
 import Datos.Dao;
 import Datos.DaoUsuarios;
 import Funciones.FuncionesGenerales;
@@ -30,43 +29,51 @@ public class ServletUsuarios extends HttpServlet {
         String accion = req.getParameter("accion");
         if (accion != null) {
             switch (accion) {
-                case "listarUsuarios":  {
-                try {
-                    this.listarUsuarios(req, resp);
-                } catch (ClassNotFoundException | SQLException ex) {
-                    Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                case "listarUsuarios": {
+                    try {
+                        this.listarUsuarios(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
-                }
-                
-                break;
-                case "desactivarUsuario":  {
-                try {
-                    this.desactivarUsuario(req, resp);
-                } catch (ClassNotFoundException | SQLException ex) {
-                    Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                }
-                
-                break;
-                case "activarUsuario":  {
-                try {
-                    this.activarUsuario(req, resp);
-                } catch (ClassNotFoundException | SQLException ex) {
-                    Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                }
-                
-                break;
-                case "obtenerUsuarioById":  {
-                try {
-                    this.obtenerUsuarioById(req, resp);
-                } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                }
-                
-                break;
 
+                break;
+                case "desactivarUsuario": {
+                    try {
+                        this.desactivarUsuario(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                break;
+                case "activarUsuario": {
+                    try {
+                        this.activarUsuario(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                break;
+                case "obtenerUsuarioById": {
+                    try {
+                        this.obtenerUsuarioById(req, resp);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                break;
+                case "usuarioByDato": {
+                    try {
+                        this.usuarioByDato(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                break;
 
                 default:
 
@@ -86,7 +93,16 @@ public class ServletUsuarios extends HttpServlet {
                         Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                
+
+                break;
+                case "actualizarUsuario": {
+                    try {
+                        this.actualizarUsuario(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
                 break;
 
                 default:
@@ -109,12 +125,12 @@ public class ServletUsuarios extends HttpServlet {
         //para obtener la fecha de creaccion
         Date fecha_creacion = FuncionesGenerales.obtenerFechaServer("yyyy-MM-dd");
         int status = 1;
-        
+
         //creamos el objeto
         Usuario user = new Usuario(nombre, TipoDoc, Identificacion, Email, password, telefono, fecha_creacion, status, Rol, Sede);
         //guardamos en la base de datos
         int registrar = new Dao().crearUsuario(user);
-        
+
         //devolvemos la respuesta
         Gson gson = new Gson();
         String json = gson.toJson(registrar);
@@ -124,39 +140,36 @@ public class ServletUsuarios extends HttpServlet {
         out.flush();
     }
 
-
-
-
     private void accionDefaul(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
     }
 
     private void listarUsuarios(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
         List<Usuario> usuarios = new DaoUsuarios().listarUsuarios();
-        
+
         Gson gson = new Gson();
         String json = gson.toJson(usuarios);
         resp.setContentType("application/json");
         PrintWriter out = resp.getWriter();
         out.print(json);
         out.flush();
-        
+
     }
 
     private void desactivarUsuario(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
         int idUsuario = Integer.parseInt(req.getParameter("idUsuario"));
         int desactivarUsuario = new DaoUsuarios().desactivarUsuario(idUsuario);
-        
+
         resp.setContentType("text/plain");
         PrintWriter out = resp.getWriter();
         out.print(desactivarUsuario);
         out.flush();
     }
-    
+
     private void activarUsuario(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
         int idUsuario = Integer.parseInt(req.getParameter("idUsuario"));
         int desactivarUsuario = new DaoUsuarios().activarUsuario(idUsuario);
-        
+
         resp.setContentType("text/plain");
         PrintWriter out = resp.getWriter();
         out.print(desactivarUsuario);
@@ -165,15 +178,79 @@ public class ServletUsuarios extends HttpServlet {
 
     private void obtenerUsuarioById(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
         int idUsuario = Integer.parseInt(req.getParameter("idUsuario"));
-        
+
         Usuario user = new DaoUsuarios().obtenerUsuarioById(idUsuario);
-        
+
         Gson gson = new Gson();
         String json = gson.toJson(user);
         resp.setContentType("application/json");
         PrintWriter out = resp.getWriter();
         out.print(json);
         out.flush();
+    }
+
+    private void actualizarUsuario(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        int idUsuario = Integer.parseInt(req.getParameter("idUsuario"));
+        String nombre = req.getParameter("nombre");
+        String email = req.getParameter("email");
+        String documento = req.getParameter("documento");
+        String telefono = req.getParameter("telefono");
+        int sede = Integer.parseInt(req.getParameter("sede"));
+        int rol = Integer.parseInt(req.getParameter("rol"));
+
+        Usuario user = new Usuario();
+        user.setIdUsuario(idUsuario);
+        user.setNombre(nombre);
+        user.setEmail(email);
+        user.setN_documento(documento);
+        user.setTelefonoUser(telefono);
+        user.setId_sede(sede);
+        user.setId_rol(rol);
+
+        int actualizarUsuario = new DaoUsuarios().actualizarUsuario(user);
+        resp.setContentType("text/plain");
+        PrintWriter out = resp.getWriter();
+        out.print(actualizarUsuario);
+        out.flush();
+    }
+
+    private void usuarioByDato(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException, SQLException {
+        String dato = req.getParameter("Dato");
+        
+
+        Usuario user = new DaoUsuarios().obtenerUsuarioByCedula(dato);
+        
+        if (user.getError() != null) {
+            user = null;
+            user = new DaoUsuarios().obtenerUsuarioByNombre(dato);
+            if (user.getError() != null) {
+
+                Gson gson = new Gson();
+                String json = gson.toJson(user);
+                resp.setContentType("application/json");
+                PrintWriter out = resp.getWriter();
+                out.print(json);
+                out.flush();
+            } else {
+
+                Gson gson = new Gson();
+                String json = gson.toJson(user);
+                resp.setContentType("application/json");
+                PrintWriter out = resp.getWriter();
+                out.print(json);
+                out.flush();
+            }
+
+        } else {
+
+            Gson gson = new Gson();
+            String json = gson.toJson(user);
+            resp.setContentType("application/json");
+            PrintWriter out = resp.getWriter();
+            out.print(json);
+            out.flush();
+        }
+
     }
 
 }

@@ -19,6 +19,9 @@ public class DaoUsuarios {
     private static final String SQL_UPDATE_DESACTIVARUSUARIO = "UPDATE usuario SET status = 0 WHERE idUsuario = ?";
     private static final String SQL_UPDATE_ACTIVARUSUARIO = "UPDATE usuario SET status = 1 WHERE idUsuario = ?";
     private static final String SQL_SELECT_USUARIOBYID = "SELECT usuario.idUsuario, usuario.nombre, usuario.email, usuario.n_documento, usuario.telefono, sede.idSede, sede.nombre_sede, rol.idRol, rol.nombre_rol FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede INNER JOIN rol ON usuario.id_rol = rol.idRol WHERE idUsuario = ?";
+    private static final String SQL_UPDATE_USUARIO = "UPDATE usuario SET nombre = ?, n_documento = ?, email = ?, telefono = ?, id_rol = ?, id_sede = ? WHERE idUsuario = ?";
+    private static final String SQL_SELECT_USUARIOBYCEDULA = "SELECT usuario.idUsuario, usuario.nombre, usuario.email, usuario.n_documento, usuario.telefono, usuario.estado_conexion, usuario.status, usuario.ultima_sesion, sede.nombre_sede, rol.nombre_rol FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede INNER JOIN rol ON usuario.id_rol = rol.idRol WHERE usuario.n_documento = ?;";
+    private static final String SQL_SELECT_USUARIOBYNOMBRE = "SELECT usuario.idUsuario, usuario.nombre, usuario.email, usuario.n_documento, usuario.telefono, usuario.estado_conexion, usuario.status, usuario.ultima_sesion, sede.nombre_sede, rol.nombre_rol FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede INNER JOIN rol ON usuario.id_rol = rol.idRol WHERE usuario.nombre = ?";
 
     public List<Usuario> listarUsuarios() throws ClassNotFoundException, SQLException {
         Connection con = null;
@@ -233,7 +236,7 @@ public class DaoUsuarios {
         }
         return rown;
     }
-    
+
     public int activarUsuario(int user) throws ClassNotFoundException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -280,7 +283,7 @@ public class DaoUsuarios {
                 String nombreSede = rs.getString("nombre_sede");
                 int idRol = rs.getInt("idRol");
                 String nombreRol = rs.getString("nombre_rol");
-                
+
                 user = new Usuario();
                 user.setIdUsuario(idUsuario);
                 user.setNombre(nombre);
@@ -294,6 +297,157 @@ public class DaoUsuarios {
 
             }
 
+        } catch (SQLException ex) {
+            ex.printStackTrace(System.out);
+        } finally {
+            Conexion.close(con);
+            Conexion.close(stmt);
+            Conexion.close(rs);
+
+        }
+
+        return user;
+    }
+
+    public int actualizarUsuario(Usuario user) throws ClassNotFoundException, SQLException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+
+        int rown = 0;
+        try {
+            con = Conexion.getConnection();
+            stmt = con.prepareStatement(SQL_UPDATE_USUARIO);
+
+            stmt.setString(1, user.getNombre());
+            stmt.setString(3, user.getEmail());
+            stmt.setString(2, user.getN_documento());
+            stmt.setString(4, user.getTelefonoUser());
+            stmt.setInt(6, user.getId_sede());
+            stmt.setInt(5, user.getId_rol());
+            stmt.setInt(7, user.getIdUsuario());
+
+            rown = stmt.executeUpdate();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace(System.out);
+        } finally {
+            Conexion.close(con);
+            Conexion.close(stmt);
+
+        }
+        return rown;
+    }
+
+    public Usuario obtenerUsuarioByCedula(String dato) throws ClassNotFoundException, SQLException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Usuario user = null;
+
+        try {
+            con = Conexion.getConnection();
+            stmt = con.prepareStatement(SQL_SELECT_USUARIOBYCEDULA);
+            stmt.setString(1, dato);
+
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                String error = "Usuario No Encontrado";
+                user = new Usuario();
+                user.setError(error);
+                return user;
+            } else {
+
+                while (rs.next()) {
+                    int idUsuario = rs.getInt("idUsuario");
+                    String nombre = rs.getString("nombre");
+                    String email = rs.getString("email");
+                    String cedula = rs.getString("n_documento");
+                    String telefono = rs.getString("telefono");
+                    String estado_conexion = rs.getString("estado_conexion");
+                    int estatus = rs.getInt("status");
+                    int idSede = rs.getInt("idSede");
+                    String nombreSede = rs.getString("nombre_sede");
+                    int idRol = rs.getInt("idRol");
+                    String nombreRol = rs.getString("nombre_rol");
+                    String error = "Usuario Encontrado";
+
+                    user = new Usuario();
+                    user.setIdUsuario(idUsuario);
+                    user.setNombre(nombre);
+                    user.setN_documento(cedula);
+                    user.setEmail(email);
+                    user.setTelefonoUser(telefono);
+                    user.setEstado_conexion(estado_conexion);
+                    user.setStatus(estatus);
+                    user.setId_sede(idSede);
+                    user.setNombre_sede(nombreSede);
+                    user.setId_rol(idRol);
+                    user.setNombre_rol(nombreRol);
+                    user.setError(error);
+
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace(System.out);
+        } finally {
+            Conexion.close(con);
+            Conexion.close(stmt);
+            Conexion.close(rs);
+
+        }
+
+        return user;
+    }
+
+    public Usuario obtenerUsuarioByNombre(String dato) throws ClassNotFoundException, SQLException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Usuario user = null;
+
+        try {
+            con = Conexion.getConnection();
+            stmt = con.prepareStatement(SQL_SELECT_USUARIOBYNOMBRE);
+            stmt.setString(1, dato);
+
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                String error = "Usuario No Encontrado";
+                user = new Usuario();
+                user.setError(error);
+            } else {
+
+                while (rs.next()) {
+                    int idUsuario = rs.getInt("idUsuario");
+                    String nombre = rs.getString("nombre");
+                    String email = rs.getString("email");
+                    String cedula = rs.getString("n_documento");
+                    String telefono = rs.getString("telefono");
+                    String estado_conexion = rs.getString("estado_conexion");
+                    int estatus = rs.getInt("status");
+                    int idSede = rs.getInt("idSede");
+                    String nombreSede = rs.getString("nombre_sede");
+                    int idRol = rs.getInt("idRol");
+                    String nombreRol = rs.getString("nombre_rol");
+
+                    user = new Usuario();
+                    user.setIdUsuario(idUsuario);
+                    user.setNombre(nombre);
+                    user.setN_documento(cedula);
+                    user.setEmail(email);
+                    user.setTelefonoUser(telefono);
+                    user.setEstado_conexion(estado_conexion);
+                    user.setStatus(estatus);
+                    user.setId_sede(idSede);
+                    user.setNombre_sede(nombreSede);
+                    user.setId_rol(idRol);
+                    user.setNombre_rol(nombreRol);
+                    String error = "Usuario Encontrado";
+                    user.setError(error);
+
+                }
+            }
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
         } finally {

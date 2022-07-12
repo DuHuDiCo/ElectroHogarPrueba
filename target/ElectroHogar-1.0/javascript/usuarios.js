@@ -234,6 +234,54 @@ function editarUsuario(idUsuario) {
 
 }
 
+function actualizarUsuarios() {
+    validarSession();
+    var datos = {};
+    datos.idUsuario = document.getElementById('IdUsuarioModal').value;
+    datos.nombre = document.getElementById('txtNombreUsuario').value;
+    datos.email = document.getElementById('TxtEmailusuario').value;
+    datos.documento = document.getElementById('TxtDocumento').value;
+    datos.telefono = document.getElementById('txtTelefono').value;
+    datos.sede = document.getElementById('sltSede').value;
+    datos.rol = document.getElementById('sltRol').value;
+
+
+
+    $.ajax({
+        method: "POST",
+        url: "ServletUsuarios?accion=actualizarUsuario",
+        data: datos,
+        dataType: 'JSON'
+
+    }).done(function (data) {
+        var datos = data;
+        if (datos > 0) {
+            Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: 'Usuario Actualizado Con Exito',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            setTimeout(recagar, 2000);
+            $('#modalEditarUsuario').modal('show');
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al Actualizar Usuario',
+                text: 'No Se Logro Actualizar el Usuario',
+                footer: '<a href="">Why do I have this issue?</a>'
+            });
+        }
+
+
+    }).fail(function () {
+        window.location.replace("login.html");
+    }).always(function () {
+    });
+}
+
+
 function selectEditarUsuarioSede(id, sede) {
 
 
@@ -273,13 +321,13 @@ function selectEditarUsuarioRol(id, rol) {
 
         $.each(json, function (key, value) {
             if (rol === value.nombre_rol) {
-                if (value.nombre_rol !== 'Super Administrador' ) {
-                    $("#" + id).append('<option value="' + value.idRol + '" selected>' + value.nombre_rol + '</option>');
+                if (value.nombre_rol !== 'Super Administrador') {
+                    $("#" + id).append('<option value="' + value.id_rol + '" selected>' + value.nombre_rol + '</option>');
                 }
 
             } else {
-                if (value.nombre_rol !== 'Super Administrador' ) {
-                    $("#" + id).append('<option value="' + value.idRol + '" >' + value.nombre_rol + '</option>');
+                if (value.nombre_rol !== 'Super Administrador') {
+                    $("#" + id).append('<option value="' + value.id_rol + '" >' + value.nombre_rol + '</option>');
                 }
             }
 
@@ -357,6 +405,41 @@ function desactivarUsuario(idUsuario) {
     });
 
 
+}
+
+function usuariosCedulaAdmin() {
+    validarSession();
+    
+    var buscar = document.getElementById('txtBuscar').value;
+    $.ajax({
+        method: "GET",
+        url: "ServletUsuarios?accion=usuarioByDato&Dato="+buscar
+
+    }).done(function (data) {
+        var datos =JSON.stringify(data);
+        var json = JSON.parse(datos);
+        if (json.error === "Usuario Encontrado") {
+            Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: 'Usuario activado Con Exito',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            setTimeout(recagar, 2000);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al activar Usuario',
+                text: 'Usuario o Contreseña Incorrectos',
+                footer: '<a href="">Why do I have this issue?</a>'
+            });
+        }
+
+    }).fail(function () {
+        window.location.replace("login.html");
+    }).always(function () {
+    });
 }
 
 function recagar() {
