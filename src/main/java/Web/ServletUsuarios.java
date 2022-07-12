@@ -65,9 +65,18 @@ public class ServletUsuarios extends HttpServlet {
                 }
 
                 break;
-                case "usuarioByDato": {
+                case "usuarioByCedula": {
                     try {
-                        this.usuarioByDato(req, resp);
+                        this.usuarioByCedula(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                break;
+                case "usuarioByNombre": {
+                    try {
+                        this.usuarioByNombre(req, resp);
                     } catch (ClassNotFoundException | SQLException ex) {
                         Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -214,42 +223,29 @@ public class ServletUsuarios extends HttpServlet {
         out.flush();
     }
 
-    private void usuarioByDato(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException, SQLException {
+    private void usuarioByCedula(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException, SQLException {
         String dato = req.getParameter("Dato");
-        
 
-        Usuario user = new DaoUsuarios().obtenerUsuarioByCedula(dato);
-        
-        if (user.getError() != null) {
-            user = null;
-            user = new DaoUsuarios().obtenerUsuarioByNombre(dato);
-            if (user.getError() != null) {
+        Usuario userCedula = new DaoUsuarios().obtenerUsuarioByCedula(dato);
+        Gson gson = new Gson();
+        String json = gson.toJson(userCedula);
+        resp.setContentType("application/json");
+        PrintWriter out = resp.getWriter();
+        out.print(json);
+        out.flush();
 
-                Gson gson = new Gson();
-                String json = gson.toJson(user);
-                resp.setContentType("application/json");
-                PrintWriter out = resp.getWriter();
-                out.print(json);
-                out.flush();
-            } else {
+    }
+    
+    private void usuarioByNombre(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException, SQLException {
+        String dato = req.getParameter("Dato");
 
-                Gson gson = new Gson();
-                String json = gson.toJson(user);
-                resp.setContentType("application/json");
-                PrintWriter out = resp.getWriter();
-                out.print(json);
-                out.flush();
-            }
-
-        } else {
-
-            Gson gson = new Gson();
-            String json = gson.toJson(user);
-            resp.setContentType("application/json");
-            PrintWriter out = resp.getWriter();
-            out.print(json);
-            out.flush();
-        }
+        Usuario userCedula = new DaoUsuarios().obtenerUsuarioByNombre(dato);
+        Gson gson = new Gson();
+        String json = gson.toJson(userCedula);
+        resp.setContentType("application/json");
+        PrintWriter out = resp.getWriter();
+        out.print(json);
+        out.flush();
 
     }
 

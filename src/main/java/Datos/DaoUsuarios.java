@@ -20,8 +20,8 @@ public class DaoUsuarios {
     private static final String SQL_UPDATE_ACTIVARUSUARIO = "UPDATE usuario SET status = 1 WHERE idUsuario = ?";
     private static final String SQL_SELECT_USUARIOBYID = "SELECT usuario.idUsuario, usuario.nombre, usuario.email, usuario.n_documento, usuario.telefono, sede.idSede, sede.nombre_sede, rol.idRol, rol.nombre_rol FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede INNER JOIN rol ON usuario.id_rol = rol.idRol WHERE idUsuario = ?";
     private static final String SQL_UPDATE_USUARIO = "UPDATE usuario SET nombre = ?, n_documento = ?, email = ?, telefono = ?, id_rol = ?, id_sede = ? WHERE idUsuario = ?";
-    private static final String SQL_SELECT_USUARIOBYCEDULA = "SELECT usuario.idUsuario, usuario.nombre, usuario.email, usuario.n_documento, usuario.telefono, usuario.estado_conexion, usuario.status, usuario.ultima_sesion, sede.nombre_sede, rol.nombre_rol FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede INNER JOIN rol ON usuario.id_rol = rol.idRol WHERE usuario.n_documento = ?;";
-    private static final String SQL_SELECT_USUARIOBYNOMBRE = "SELECT usuario.idUsuario, usuario.nombre, usuario.email, usuario.n_documento, usuario.telefono, usuario.estado_conexion, usuario.status, usuario.ultima_sesion, sede.nombre_sede, rol.nombre_rol FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede INNER JOIN rol ON usuario.id_rol = rol.idRol WHERE usuario.nombre = ?";
+    private static final String SQL_SELECT_USUARIOBYCEDULA = "SELECT usuario.idUsuario, usuario.nombre, usuario.email, usuario.n_documento, usuario.telefono, usuario.estado_conexion, usuario.status, usuario.ultima_sesion, sede.nombre_sede, rol.nombre_rol FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede INNER JOIN rol ON usuario.id_rol = rol.idRol WHERE n_documento = ?";
+    private static final String SQL_SELECT_USUARIOBYNOMBRE = "SELECT usuario.idUsuario, usuario.nombre, usuario.email, usuario.n_documento, usuario.telefono, usuario.estado_conexion, usuario.status, usuario.ultima_sesion, sede.nombre_sede, rol.nombre_rol FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede INNER JOIN rol ON usuario.id_rol = rol.idRol WHERE nombre = ?";
 
     public List<Usuario> listarUsuarios() throws ClassNotFoundException, SQLException {
         Connection con = null;
@@ -351,13 +351,7 @@ public class DaoUsuarios {
 
             rs = stmt.executeQuery();
 
-            if (!rs.next()) {
-                String error = "Usuario No Encontrado";
-                user = new Usuario();
-                user.setError(error);
-                return user;
-            } else {
-
+            if (rs.isBeforeFirst()) {
                 while (rs.next()) {
                     int idUsuario = rs.getInt("idUsuario");
                     String nombre = rs.getString("nombre");
@@ -366,9 +360,8 @@ public class DaoUsuarios {
                     String telefono = rs.getString("telefono");
                     String estado_conexion = rs.getString("estado_conexion");
                     int estatus = rs.getInt("status");
-                    int idSede = rs.getInt("idSede");
+                    String sesion = rs.getString("ultima_sesion");
                     String nombreSede = rs.getString("nombre_sede");
-                    int idRol = rs.getInt("idRol");
                     String nombreRol = rs.getString("nombre_rol");
                     String error = "Usuario Encontrado";
 
@@ -380,13 +373,16 @@ public class DaoUsuarios {
                     user.setTelefonoUser(telefono);
                     user.setEstado_conexion(estado_conexion);
                     user.setStatus(estatus);
-                    user.setId_sede(idSede);
+                    user.setUltima_sesion(sesion);
                     user.setNombre_sede(nombreSede);
-                    user.setId_rol(idRol);
                     user.setNombre_rol(nombreRol);
                     user.setError(error);
 
                 }
+            } else {
+                String error = "null";
+                user = new Usuario();
+                user.setError(error);
             }
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
@@ -412,12 +408,7 @@ public class DaoUsuarios {
             stmt.setString(1, dato);
 
             rs = stmt.executeQuery();
-            if (!rs.next()) {
-                String error = "Usuario No Encontrado";
-                user = new Usuario();
-                user.setError(error);
-            } else {
-
+            if (rs.isBeforeFirst()) {
                 while (rs.next()) {
                     int idUsuario = rs.getInt("idUsuario");
                     String nombre = rs.getString("nombre");
@@ -426,10 +417,10 @@ public class DaoUsuarios {
                     String telefono = rs.getString("telefono");
                     String estado_conexion = rs.getString("estado_conexion");
                     int estatus = rs.getInt("status");
-                    int idSede = rs.getInt("idSede");
+                    String sesion = rs.getString("ultima_sesion");
                     String nombreSede = rs.getString("nombre_sede");
-                    int idRol = rs.getInt("idRol");
                     String nombreRol = rs.getString("nombre_rol");
+                    String error = "Usuario Encontrado";
 
                     user = new Usuario();
                     user.setIdUsuario(idUsuario);
@@ -439,14 +430,16 @@ public class DaoUsuarios {
                     user.setTelefonoUser(telefono);
                     user.setEstado_conexion(estado_conexion);
                     user.setStatus(estatus);
-                    user.setId_sede(idSede);
+                    user.setUltima_sesion(sesion);
                     user.setNombre_sede(nombreSede);
-                    user.setId_rol(idRol);
                     user.setNombre_rol(nombreRol);
-                    String error = "Usuario Encontrado";
                     user.setError(error);
 
                 }
+            } else {
+                String error = "null";
+                user = new Usuario();
+                user.setError(error);
             }
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);

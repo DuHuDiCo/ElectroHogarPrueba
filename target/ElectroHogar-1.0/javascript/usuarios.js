@@ -409,38 +409,119 @@ function desactivarUsuario(idUsuario) {
 
 function usuariosCedulaAdmin() {
     validarSession();
-    
+
     var buscar = document.getElementById('txtBuscar').value;
+    if (buscar === "") {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al Filtrar Usuario',
+            text: 'Campo Vacio',
+            footer: '<a href="">Why do I have this issue?</a>'
+        });
+    } else {
+
+
+        $.ajax({
+            method: "GET",
+            url: "ServletUsuarios?accion=usuarioByCedula&Dato=" + buscar
+
+        }).done(function (data) {
+            var datos = JSON.stringify(data);
+            var json = JSON.parse(datos);
+            var contador = 1;
+            $("#dataTable tbody").empty();
+            if (json.error === "null") {
+                usuariosNombreAdmin(buscar);
+            } else {
+                if (json.status === 1 && json.estado_conexion === "Conectado") {
+                    var accion = "<a onclick='editarUsuario(" + json.idUsuario + ")' class='btn btn-primary btn-sm'><i class='fas fa-pen'></i></a><a onclick='desactivarUsuario(" + json.idUsuario + ")' class='btn btn-danger btn-sm'><i class='fas fa-ban'></i></a>";
+                    $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + json.nombre_usuario + '</td><td>' + json.email + '</td><td>' + json.n_documento + '</td><td>' + json.telefonoUser + '</td><td>' + "<i class='fas fa-circle'></i>" + '</td><td>' + "<i class='fas fa-check'></i>" + '</td><td>' + json.ultima_sesion + '</td><td>' + json.nombre_sede + '</td><td>' + json.nombre_rol + '</td><td>' + accion + '</td></tr>');
+                    contador++;
+                } else {
+                    if (json.status === 1 && json.estado_conexion === "Desconectado") {
+                        var accion = "<a onclick='editarUsuario(" + json.idUsuario + ")' class='btn btn-primary btn-sm'><i class='fas fa-pen'></i></a><a onclick='desactivarUsuario(" + json.idUsuario + ")' class='btn btn-danger btn-sm'><i class='fas fa-ban'></i></a>";
+                        $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + json.nombre_usuario + '</td><td>' + json.email + '</td><td>' + json.n_documento + '</td><td>' + json.telefonoUser + '</td><td>' + "<i class='far fa-circle'></i>" + '</td><td>' + "<i class='fas fa-check'></i>" + '</td><td>' + json.ultima_sesion + '</td><td>' + json.nombre_sede + '</td><td>' + json.nombre_rol + '</td><td>' + accion + '</td></tr>');
+                        contador++;
+                    } else {
+                        if (json.status === 0) {
+                            var accion = "<a onclick='activarUsuario(" + json.idUsuario + ")' class='btn btn-success btn-sm'><i class='fas fa-check'></i></a>";
+                            $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + json.nombre_usuario + '</td><td>' + json.email + '</td><td>' + json.n_documento + '</td><td>' + json.telefonoUser + '</td><td>' + "<i class='far fa-circle'></i>" + '</td><td>' + "<i class='fas fa-times'></i>" + '</td><td>' + json.ultima_sesion + '</td><td>' + json.nombre_sede + '</td><td>' + json.nombre_rol + '</td><td>' + accion + '</td></tr>');
+                            contador++;
+                        } else {
+                            var accion = "<a onclick='editarUsuario(" + json.idUsuario + ")' class='btn btn-primary btn-sm'><i class='fas fa-pen'></i></a><a onclick='desactivarUsuario(" + json.idUsuario + ")' class='btn btn-danger btn-sm'><i class='fas fa-ban'></i></a>";
+                            $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + json.nombre_usuario + '</td><td>' + json.email + '</td><td>' + json.n_documento + '</td><td>' + json.telefonoUser + '</td><td>' + "<i class='far fa-circle'></i>" + '</td><td>' + "<i class='fas fa-times'></i>" + '</td><td>' + json.ultima_sesion + '</td><td>' + json.nombre_sede + '</td><td>' + json.nombre_rol + '</td><td>' + accion + '</td></tr>');
+                            contador++;
+                        }
+
+                    }
+
+                }
+            }
+
+
+
+
+        }).fail(function () {
+            window.location.replace("login.html");
+        }).always(function () {
+        });
+    }
+}
+
+function usuariosNombreAdmin(buscar) {
+
     $.ajax({
         method: "GET",
-        url: "ServletUsuarios?accion=usuarioByDato&Dato="+buscar
+        url: "ServletUsuarios?accion=usuarioByNombre&Dato=" + buscar
 
     }).done(function (data) {
-        var datos =JSON.stringify(data);
+        var datos = JSON.stringify(data);
         var json = JSON.parse(datos);
-        if (json.error === "Usuario Encontrado") {
-            Swal.fire({
-                position: 'top-end',
-                icon: 'success',
-                title: 'Usuario activado Con Exito',
-                showConfirmButton: false,
-                timer: 2000
-            });
-            setTimeout(recagar, 2000);
-        } else {
+        var contador = 1;
+        $("#dataTable tbody").empty();
+
+        if (json.error === "null") {
             Swal.fire({
                 icon: 'error',
-                title: 'Error al activar Usuario',
-                text: 'Usuario o Contreseña Incorrectos',
+                title: 'Error al Encontrar Usuario',
+                text: 'Usuario No Existe',
                 footer: '<a href="">Why do I have this issue?</a>'
             });
+        } else {
+            if (json.status === 1 && json.estado_conexion === "Conectado") {
+                var accion = "<a onclick='editarUsuario(" + json.idUsuario + ")' class='btn btn-primary btn-sm'><i class='fas fa-pen'></i></a><a onclick='desactivarUsuario(" + json.idUsuario + ")' class='btn btn-danger btn-sm'><i class='fas fa-ban'></i></a>";
+                $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + json.nombre_usuario + '</td><td>' + json.email + '</td><td>' + json.n_documento + '</td><td>' + json.telefonoUser + '</td><td>' + "<i class='fas fa-circle'></i>" + '</td><td>' + "<i class='fas fa-check'></i>" + '</td><td>' + json.ultima_sesion + '</td><td>' + json.nombre_sede + '</td><td>' + json.nombre_rol + '</td><td>' + accion + '</td></tr>');
+                contador++;
+            } else {
+                if (json.status === 1 && json.estado_conexion === "Desconectado") {
+                    var accion = "<a onclick='editarUsuario(" + json.idUsuario + ")' class='btn btn-primary btn-sm'><i class='fas fa-pen'></i></a><a onclick='desactivarUsuario(" + json.idUsuario + ")' class='btn btn-danger btn-sm'><i class='fas fa-ban'></i></a>";
+                    $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + json.nombre_usuario + '</td><td>' + json.email + '</td><td>' + json.n_documento + '</td><td>' + json.telefonoUser + '</td><td>' + "<i class='far fa-circle'></i>" + '</td><td>' + "<i class='fas fa-check'></i>" + '</td><td>' + json.ultima_sesion + '</td><td>' + json.nombre_sede + '</td><td>' + json.nombre_rol + '</td><td>' + accion + '</td></tr>');
+                    contador++;
+                } else {
+                    if (json.status === 0) {
+                        var accion = "<a onclick='activarUsuario(" + json.idUsuario + ")' class='btn btn-success btn-sm'><i class='fas fa-check'></i></a>";
+                        $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + json.nombre_usuario + '</td><td>' + json.email + '</td><td>' + json.n_documento + '</td><td>' + json.telefonoUser + '</td><td>' + "<i class='far fa-circle'></i>" + '</td><td>' + "<i class='fas fa-times'></i>" + '</td><td>' + json.ultima_sesion + '</td><td>' + json.nombre_sede + '</td><td>' + json.nombre_rol + '</td><td>' + accion + '</td></tr>');
+                        contador++;
+                    } else {
+                        var accion = "<a onclick='editarUsuario(" + json.idUsuario + ")' class='btn btn-primary btn-sm'><i class='fas fa-pen'></i></a><a onclick='desactivarUsuario(" + json.idUsuario + ")' class='btn btn-danger btn-sm'><i class='fas fa-ban'></i></a>";
+                        $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + json.nombre_usuario + '</td><td>' + json.email + '</td><td>' + json.n_documento + '</td><td>' + json.telefonoUser + '</td><td>' + "<i class='far fa-circle'></i>" + '</td><td>' + "<i class='fas fa-times'></i>" + '</td><td>' + json.ultima_sesion + '</td><td>' + json.nombre_sede + '</td><td>' + json.nombre_rol + '</td><td>' + accion + '</td></tr>');
+                        contador++;
+                    }
+
+                }
+
+            }
         }
+
+
+
 
     }).fail(function () {
         window.location.replace("login.html");
     }).always(function () {
     });
 }
+
 
 function recagar() {
     window.location.reload();

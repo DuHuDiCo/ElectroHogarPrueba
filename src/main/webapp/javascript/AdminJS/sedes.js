@@ -31,6 +31,7 @@ function guardarSede() {
                 showConfirmButton: false,
                 timer: 2000
             });
+            
             setTimeout(recargarPagina, 2000);
 
 
