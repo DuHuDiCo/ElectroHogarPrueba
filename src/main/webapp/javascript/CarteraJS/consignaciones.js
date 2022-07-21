@@ -871,6 +871,52 @@ function traerObservaciones(idConsignacion) {
 
 }
 
+function generarReporteCartera() {
+    $.ajax({
+        method: "GET",
+        url: "ServletControladorFiles?accion=generarReporteCartera"
+
+    }).done(function (data) {
+        var datos = data;
+        if (datos > 0) {
+            if (datos === "Error") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Reporte No Generado',
+                    text: 'Error al Generar el Reporte',
+                    footer: '<a href="">Why do I have this issue?</a>'
+                });
+            } else {
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Reporte Generado Correctamente',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+
+            setTimeout(recargarPaginaCartera, 2000);
+
+        } else {
+            if (datos === "null") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Reporte No Generado',
+                    text: 'No Existen Consignaciones Recientemente Creadas',
+                    footer: '<a href="">Why do I have this issue?</a>'
+                });
+            }
+
+        }
+    }).fail(function () {
+
+        window.location.replace("login.html");
+    }).always(function () {
+
+    });
+}
+
 function recargarPaginaCartera() {
     window.location.reload();
 }

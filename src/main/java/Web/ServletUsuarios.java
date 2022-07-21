@@ -12,13 +12,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 @WebServlet(urlPatterns = {"/ServletUsuarios"})
 
@@ -98,7 +97,7 @@ public class ServletUsuarios extends HttpServlet {
                 case "registrarUsuario": {
                     try {
                         this.registrarUsuario(req, resp);
-                    } catch (ClassNotFoundException ex) {
+                    } catch (ClassNotFoundException | MessagingException ex) {
                         Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -120,7 +119,7 @@ public class ServletUsuarios extends HttpServlet {
         }
     }
 
-    private void registrarUsuario(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException {
+    private void registrarUsuario(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, MessagingException {
         //recuperamos la informacion desde el cliente
         String nombre = req.getParameter("nombre");
         String Identificacion = req.getParameter("Identificacion");
@@ -139,7 +138,11 @@ public class ServletUsuarios extends HttpServlet {
         Usuario user = new Usuario(nombre, TipoDoc, Identificacion, Email, password, telefono, fecha_creacion, status, Rol, Sede);
         //guardamos en la base de datos
         int registrar = new Dao().crearUsuario(user);
-
+        
+        String asunto = "Datos de Inicio de Sesion Electro Hogar";
+        String mensaje = "Hola Mundo Desde Electro Hogar";
+        
+        //Funciones.FuncionesGenerales.enviarCorreo(asunto, mensaje, Email);
         //devolvemos la respuesta
         Gson gson = new Gson();
         String json = gson.toJson(registrar);

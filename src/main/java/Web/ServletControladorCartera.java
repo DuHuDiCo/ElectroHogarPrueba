@@ -1,14 +1,12 @@
 package Web;
 
 import Datos.DaoCartera;
-import Datos.DaoConsignaciones;
 import Datos.DaoObligaciones;
-import Datos.DaoObservacion;
-import Datos.DaoUsuarios;
+import Datos.DaoConsignaciones2;
+
 import Dominio.Actualizacion;
 import Dominio.Consignacion;
 import Dominio.Archivo;
-import Dominio.Observaciones;
 import Dominio.Plataforma;
 import com.google.gson.Gson;
 import java.io.File;
@@ -125,6 +123,8 @@ public class ServletControladorCartera extends HttpServlet {
 
             //guardamos la consignacion con el nuevo cliente guardado
             int idConsignacion = guardar_Consignacion(part, fecha_creacion, id_usuario, id_estado, num_recibo, fecha_pago, valor, plataforma, id_obligacionCreada);
+            int guardarConsignacionCareteraTemporal = new DaoConsignaciones2().obtenerConsignacionById(idConsignacion);
+            
 
             String respuesta = Integer.toString(idConsignacion);
             resp.setContentType("text/plain");
@@ -135,10 +135,11 @@ public class ServletControladorCartera extends HttpServlet {
             out.flush();
         } else {
             if (isExtension(part.getSubmittedFileName(), extens)) {
-                
+
                 int SaveConsig = guardar_Consignacion(part, fecha_creacion, id_usuario, id_estado, num_recibo, fecha_pago, valor, plataforma, id_obligacion);
-               
-               
+                int guardarConsignacionCareteraTemporal = new DaoConsignaciones2().obtenerConsignacionById(SaveConsig);
+                
+
                 resp.setContentType("text/plain");
 
                 PrintWriter out = resp.getWriter();
@@ -163,11 +164,11 @@ public class ServletControladorCartera extends HttpServlet {
         //Guardamos la primera actualizacion(por defecto:pendiente)
         Actualizacion actu = new Actualizacion(fecha_creacion, id_estado, id_usuario);
         int upd = new DaoCartera().guardarActualizacion(actu);
-        
 
         //Guardamos la consignacion en la BD
         Consignacion consig = new Consignacion(num_recibo, fecha_creacion, fecha_pago, valor, idFile, upd, id_usuario, plataforma, id_obligacion);
         int idConsignacion = new DaoCartera().guardarConsignacion(consig);
+
         return idConsignacion;
     }
 

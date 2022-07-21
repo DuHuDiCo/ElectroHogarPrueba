@@ -278,7 +278,7 @@ function aplicarConsignacion(id_consignacion, id) {
             });
         }
 
-        var botonGroup = '<a href="#" class="btn btn-primary" onclick="guardarCambios();">Guardar Cambios</a> <a href="#" class="btn btn-danger" onclick="cancelarCambios();">Cancelar Cambios</a>';
+        var botonGroup = '<a href="#" class="btn btn-primary" onclick="guardarCambiosCaja();">Guardar Cambios</a> <a href="#" class="btn btn-danger" onclick="cancelarCambios();">Cancelar Cambios</a>';
         document.getElementById('btn_groupCaja').innerHTML = botonGroup;
 
 
@@ -365,7 +365,7 @@ function consignacionesByCedulaCaja() {
 
 }
 
-function guardarCambios() {
+function guardarCambiosCaja() {
     validarSession();
     $.ajax({
         method: "GET",

@@ -20,6 +20,7 @@ public class DaoFiles {
     private static final String SQL_INSERT_ARCHIVOREPORTES = "INSERT INTO filesreportes(nombre_archivo, ruta, fecha, id_usuario) VALUES (?,?,NOW(),?)";
     private static final String SQL_SELECT_IDFILEIMAGEN = "SELECT id_files FROM consignacion WHERE idConsignacion = ?";
     private static final String SQL_SELECT_NOMBREFILE = "SELECT nombre FROM files WHERE idFile = ?";
+    private static final String SQL_SELECT_RUTAIMAGEN = "SELECT ruta FROM files WHERE idFile = ?";
     
     
     
@@ -203,6 +204,36 @@ public class DaoFiles {
 
         }
         return nombreFile;
+    }
+    
+    public String obtenerRutaImagen(int idFile) throws ClassNotFoundException, SQLException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        String path = null;
+        try {
+            con = Conexion.getConnection();
+            stmt = con.prepareStatement(SQL_SELECT_RUTAIMAGEN);
+            stmt.setInt(1, idFile);
+
+            rs = stmt.executeQuery();
+            
+             while (rs.next()) {
+                String ruta = rs.getString("ruta");
+                
+                path = ruta;
+                
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace(System.out);
+        } finally {
+            Conexion.close(con);
+            Conexion.close(stmt);
+
+        }
+        return path;
     }
     
 }

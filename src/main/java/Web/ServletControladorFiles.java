@@ -1,9 +1,12 @@
 package Web;
 
 import Datos.DaoCartera;
+import Datos.DaoConsignaciones2;
 import Datos.DaoFiles;
 import Datos.DaoObligaciones;
+import Datos.DaoUsuarios;
 import Dominio.Archivo;
+import Dominio.Consignacion;
 import Dominio.Obligaciones;
 import com.google.gson.Gson;
 import java.io.BufferedReader;
@@ -58,6 +61,14 @@ public class ServletControladorFiles extends HttpServlet {
                 case "obtenerRutaImagen": {
                     try {
                         this.obtenerRutaImagen(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletControladorFiles.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+                case "generarReporteCartera": {
+                    try {
+                        this.generarReporteCartera(req, resp);
                     } catch (ClassNotFoundException | SQLException ex) {
                         Logger.getLogger(ServletControladorFiles.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -265,7 +276,7 @@ public class ServletControladorFiles extends HttpServlet {
         int idConsignacion = Integer.parseInt(req.getParameter("idConsignacion"));
 
         int idFileImagen = new DaoFiles().obtenerIdFileImg(idConsignacion);
-        
+
         String nombreArchivo = new DaoFiles().obtenerNombreFile(idFileImagen);
         String ruta = "archivos/img/" + nombreArchivo;
 
@@ -275,6 +286,50 @@ public class ServletControladorFiles extends HttpServlet {
 
         out.print(ruta);
         out.flush();
+
+    }
+
+    private void generarReporteCartera(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException, SQLException {
+        List<Consignacion> consigTempCartera = new DaoConsignaciones2().listarConsignacionesTempoCartera();
+        if (consigTempCartera.size() > 0) {
+            HttpSession session = req.getSession(true);
+            String email = (String) session.getAttribute("usuario");
+            String generarPdf = Funciones.FuncionesGenerales.generarPdf(consigTempCartera, email);
+            if (generarPdf != null || !"".equals(generarPdf)) {
+                String nombreArchivo = Funciones.FuncionesGenerales.nombreArchivo(email);
+                System.out.println(nombreArchivo);
+                int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+                Archivo file = new Archivo(nombreArchivo, generarPdf);
+                file.setId_usuario(id_usuario);
+
+                int guardarArchivo = new DaoFiles().guardarArchivoReportes(file);
+
+                int elimnarTemporalCartera = new DaoConsignaciones2().eliminarTemporalCartera();
+                resp.setContentType("text/plain");
+
+                PrintWriter out = resp.getWriter();
+
+                out.print(elimnarTemporalCartera);
+                out.flush();
+            } else {
+                String error = "Error";
+                resp.setContentType("text/plain");
+
+                PrintWriter out = resp.getWriter();
+
+                out.print(error);
+                out.flush();
+            }
+
+        } else {
+            String error = "null";
+            resp.setContentType("text/plain");
+
+            PrintWriter out = resp.getWriter();
+
+            out.print(error);
+            out.flush();
+        }
 
     }
 
