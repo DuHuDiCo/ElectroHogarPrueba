@@ -196,12 +196,7 @@ public class DaoObservacion {
             stmt.setInt(1, id_observacion);
 
             rs = stmt.executeQuery();
-            if (!rs.next()) {
-                String error = "Observacion No Exite En Tabla Observaciones_temporal";
-                observaciones = new Observaciones();
-                observaciones.setError(error);
-
-            } else {
+            if (rs.isBeforeFirst()) {
                 while (rs.next()) {
                     int idObservacion = rs.getInt("idObservaciones");
                     String observacion = rs.getString("observacion");
@@ -218,9 +213,13 @@ public class DaoObservacion {
                     observaciones.setId_consignacion(id_consignacion);
 
                 }
-
+            }else{
+                String error = "null";
+                observaciones = new Observaciones();
+                observaciones.setError(error);
             }
 
+            
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
         } finally {

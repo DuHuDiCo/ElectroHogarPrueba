@@ -33,7 +33,7 @@ function listarConsignacionesContabilidad() {
             //var modalDevolver = '<button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#staticBackdrop"><i class="fas fa-backward"></i></button>';
             var obser = '<a href="#" id="btn_observa" onclick="abrirModalObservacionesContabilidad(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
             var imagen = '<a href="#" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
-            var comprobar = '<td><a href="#" id="btn_comprobar" onclick="comprobarConsignacion(' + value.idConsignacion + ');" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + devolver + obser + imagen + '</td>';
+            var comprobar = '<td><a href="#" id="btn_comprobar'+value.idConsignacion+'" onclick="comprobarConsignacion(' + value.idConsignacion + ');" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + devolver + obser + imagen + '</td>';
 
             $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + comprobar + '</tr>');
             contador = contador + 1;
@@ -293,8 +293,8 @@ function comprobarConsignacion(id_consignacion) {
     datos.idConsignacion = id_consignacion;
 
 
-    $("#btn_comprobar").empty();
-    document.getElementById('btn_comprobar').outerHTML = '<a href="#"  class="btn btn-primary btn-sm disabled" ><i class="fas fa-ban"></i></a></td>';
+    $("#btn_comprobar"+id_consignacion).empty();
+    document.getElementById('btn_comprobar'+id_consignacion).outerHTML = '<a href="#"  class="btn btn-primary btn-sm disabled" ><i class="fas fa-ban"></i></a></td>';
 
     $.ajax({
         method: "POST",
@@ -363,7 +363,7 @@ function cancelarCambios() {
             Swal.fire({
                 position: 'top-end',
                 icon: 'success',
-                title: 'Consignacion Comprobada Correctamente',
+                title: 'Cambios Cancelados Correctamente',
                 showConfirmButton: false,
                 timer: 2000
             });
@@ -372,7 +372,7 @@ function cancelarCambios() {
         } else {
             Swal.fire({
                 icon: 'error',
-                title: 'Error al Comprobar la Consignacion',
+                title: 'Error al Cancelar los Cambios',
                 text: 'Error Desconocido Reporte el Error',
                 footer: '<a href="">Why do I have this issue?</a>'
             });

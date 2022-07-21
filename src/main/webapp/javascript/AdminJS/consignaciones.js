@@ -454,6 +454,7 @@ select.addEventListener('change', (event) => {
                     $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.num_recibo + '</td><td>' + value.nombre_titular + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_sede + '</td><td>' + value.nombre_plataforma + '</td>' + obser + '</tr>');
                     contador = contador + 1;
                     document.getElementById('btnCancelarConsignacion').style.display = "block";
+                    document.getElementById('nuevoEstado').value = "Pendiente";
                 } else {
                     var imagen = '<a href="#" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
                     var obser = '<td><a href="#" id="btn_observa" onclick="abrirModalObservacionesAdmin(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>'+imagen+'</td>';

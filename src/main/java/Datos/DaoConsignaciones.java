@@ -20,13 +20,13 @@ public class DaoConsignaciones {
     private static final String SQL_UPDATE_CONSIGNACION = "UPDATE consignacion SET id_actualizacion = ? WHERE idConsignacion = ?";
     private static final String SQL_SELECT_CONSIGNACIONESBYSEDE = "SELECT consignacion.idConsignacion, consignacion.num_recibo, consignacion.fecha_creacion, consignacion.fecha_pago, consignacion.valor, actualizacion.fecha_actualizacion, estado.nombre_estado, plataforma.nombre_plataforma, obligacion.nombre_titular, obligacion.n_documento, sede.nombre_sede FROM consignacion INNER JOIN actualizacion ON consignacion.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado INNER JOIN plataforma ON consignacion.id_plataforma = plataforma.idPlataforma INNER JOIN obligacion ON consignacion.id_obligacion = obligacion.idObligacion INNER JOIN sede ON obligacion.id_sede = sede.idSede WHERE sede.nombre_sede = ? AND estado.nombre_estado = 'Comprobado' ORDER BY consignacion.fecha_creacion DESC ";
     private static final String SQL_SELECT_CONSIGNACIONESBYID = "SELECT * FROM consignacion WHERE idConsignacion = ?";
-    private static final String SQL_INSERT_CONSIGNACIONTEMP = "INSERT INTO temporal_consignacion(idConsignacion, num_recibo, fecha_creacion, fecha_pago, valor, id_files, id_actualizacion, id_usuario, id_plataforma, id_obligacion, id_observacion) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-    private static final String SQL_INSERT_CONSIGNACIONTEMP2 = "INSERT INTO temporal_consignacion(idConsignacion, num_recibo, fecha_creacion, fecha_pago, valor, id_files, id_actualizacion, id_usuario, id_plataforma, id_obligacion) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_CONSIGNACIONTEMP = "INSERT INTO temporal_consignacion(idConsignacion, num_recibo, fecha_creacion, fecha_pago, valor, id_files, id_actualizacion, id_usuario, id_plataforma, id_obligacion, id_observacion, id_comprobado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_CONSIGNACIONTEMP2 = "INSERT INTO temporal_consignacion(idConsignacion, num_recibo, fecha_creacion, fecha_pago, valor, id_files, id_actualizacion, id_usuario, id_plataforma, id_obligacion, id_comprobado) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
     private static final String SQL_DELETE_CONSIGNACIONESTEMP = "DELETE FROM temporal_consignacion";
     private static final String SQL_DELETE_CONSIGNACIONESTEMPCAJA = "DELETE FROM temporal_consignacion_caja";
     private static final String SQL_SELECT_CONSIGNACIONESTEMP = "SELECT * FROM temporal_consignacion";
     private static final String SQL_SELECT_CONSIGNACIONESTEMPCAJA = "SELECT * FROM temporal_consignacion_caja";
-    private static final String SQL_SELECT_CONSIGNACIONESTEMPPDF = "SELECT temporal_consignacion.idConsignacion, temporal_consignacion.num_recibo, temporal_consignacion.fecha_creacion, temporal_consignacion.fecha_pago, temporal_consignacion.valor, actualizacion.fecha_actualizacion, estado.nombre_estado, plataforma.nombre_plataforma, obligacion.n_documento, sede.nombre_sede FROM temporal_consignacion INNER JOIN actualizacion ON temporal_consignacion.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado INNER JOIN plataforma ON temporal_consignacion.id_plataforma = plataforma.idPlataforma INNER JOIN obligacion ON temporal_consignacion.id_obligacion = obligacion.idObligacion INNER JOIN sede ON obligacion.id_sede = sede.idSede ORDER BY temporal_consignacion.fecha_creacion DESC ";
+    private static final String SQL_SELECT_CONSIGNACIONESTEMPPDF = "SELECT temporal_consignacion.idConsignacion, temporal_consignacion.num_recibo, temporal_consignacion.fecha_creacion, temporal_consignacion.fecha_pago, temporal_consignacion.valor, actualizacion.fecha_actualizacion, estado.nombre_estado, plataforma.nombre_plataforma, obligacion.n_documento, sede.nombre_sede FROM temporal_consignacion INNER JOIN actualizacion ON temporal_consignacion.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado INNER JOIN plataforma ON temporal_consignacion.id_plataforma = plataforma.idPlataforma INNER JOIN obligacion ON temporal_consignacion.id_obligacion = obligacion.idObligacion INNER JOIN sede ON obligacion.id_sede = sede.idSede WHERE id_comprobado = ? ORDER BY temporal_consignacion.fecha_creacion DESC ";
     private static final String SQL_SELECT_CONSIGNACIONESTEMPCAJAPDF = "SELECT temporal_consignacion_caja.idConsignacion, temporal_consignacion_caja.num_recibo, temporal_consignacion_caja.fecha_creacion, temporal_consignacion_caja.fecha_pago, temporal_consignacion_caja.valor, actualizacion.fecha_actualizacion, estado.nombre_estado, plataforma.nombre_plataforma, obligacion.nombre_titular, obligacion.n_documento, sede.nombre_sede, usuario.nombre FROM temporal_consignacion_caja INNER JOIN actualizacion ON temporal_consignacion_caja.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado INNER JOIN plataforma ON temporal_consignacion_caja.id_plataforma = plataforma.idPlataforma INNER JOIN obligacion ON temporal_consignacion_caja.id_obligacion = obligacion.idObligacion INNER JOIN sede ON obligacion.id_sede = sede.idSede INNER JOIN usuario ON actualizacion.id_usuarios = usuario.idUsuario WHERE id_aplicado = ? ORDER BY temporal_consignacion_caja.fecha_creacion DESC ";
     private static final String SQL_SELECT_NOMBREUSUARIO = "SELECT nombre FROM usuario WHERE email = ?";
     private static final String SQL_UPDATE_CONSIGNACIONOBSERVACION = "UPDATE consignacion SET id_observacion = ? WHERE idConsignacion = ?";
@@ -335,9 +335,9 @@ public class DaoConsignaciones {
         int rown = 0;
         try {
             con = Conexion.getConnection();
-            if(cons.getId_observacion() != 0){
+            if (cons.getId_observacion() != 0) {
                 stmt = con.prepareStatement(SQL_INSERT_CONSIGNACIONTEMP);
-            }else{
+            } else {
                 stmt = con.prepareStatement(SQL_INSERT_CONSIGNACIONTEMP2);
             }
             stmt.setInt(1, cons.getIdConsignacion());
@@ -350,10 +350,12 @@ public class DaoConsignaciones {
             stmt.setInt(8, cons.getId_usuario());
             stmt.setInt(9, cons.getId_plataforma());
             stmt.setInt(10, cons.getId_obligacion());
-            if(cons.getId_observacion() != 0){
+            if (cons.getId_observacion() != 0) {
                 stmt.setInt(11, cons.getId_observacion());
+                stmt.setInt(12, cons.getId_aplicado());
+            } else {
+                stmt.setInt(11, cons.getId_aplicado());
             }
-            
 
             rown = stmt.executeUpdate();
 
@@ -374,12 +376,12 @@ public class DaoConsignaciones {
         int rown = 0;
         try {
             con = Conexion.getConnection();
-            if(cons.getId_observacion() != 0){
+            if (cons.getId_observacion() != 0) {
                 stmt = con.prepareStatement(SQL_INSERT_CONSIGNACIONTEMPCAJA);
-            }else{
+            } else {
                 stmt = con.prepareStatement(SQL_INSERT_CONSIGNACIONTEMPCAJASINOBSERVACION);
             }
-            
+
             stmt.setInt(1, cons.getIdConsignacion());
             stmt.setString(2, cons.getNum_recibo());
             stmt.setDate(3, cons.getFecha_creacion());
@@ -390,12 +392,12 @@ public class DaoConsignaciones {
             stmt.setInt(8, cons.getId_usuario());
             stmt.setInt(9, cons.getId_plataforma());
             stmt.setInt(10, cons.getId_obligacion());
-            if(cons.getId_observacion() != 0){
+            if (cons.getId_observacion() != 0) {
                 stmt.setInt(11, cons.getId_observacion());
                 stmt.setInt(12, cons.getId_aplicado());
             }
             stmt.setInt(11, cons.getId_aplicado());
-            
+
             rown = stmt.executeUpdate();
 
         } catch (SQLException ex) {
@@ -536,7 +538,7 @@ public class DaoConsignaciones {
 
     }
 
-    public List<Consignacion> listarConsinacionesTempPdf() throws ClassNotFoundException {
+    public List<Consignacion> listarConsinacionesTempPdf(int id_comprobado) throws ClassNotFoundException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -547,6 +549,7 @@ public class DaoConsignaciones {
         try {
             con = Conexion.getConnection();
             stmt = con.prepareStatement(SQL_SELECT_CONSIGNACIONESTEMPPDF);
+            stmt.setInt(1, id_comprobado);
 
             rs = stmt.executeQuery();
 
@@ -591,7 +594,7 @@ public class DaoConsignaciones {
             con = Conexion.getConnection();
             stmt = con.prepareStatement(SQL_SELECT_CONSIGNACIONESTEMPCAJAPDF);
             stmt.setInt(1, id_usuario);
-            
+
             rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -1006,7 +1009,7 @@ public class DaoConsignaciones {
         return consigna;
 
     }
-    
+
     public int actualizarObservacionConsignacionTemporal(int id_observacion, int id_consignacion) throws ClassNotFoundException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;

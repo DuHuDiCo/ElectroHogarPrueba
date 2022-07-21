@@ -360,6 +360,7 @@ select.addEventListener('change', (event) => {
                 $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.num_recibo + '</td><td>' + value.nombre_titular + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_sede + '</td><td>' + value.nombre_plataforma + '</td>' + accion + '</tr>');
                 contador = contador + 1;
                 document.getElementById('btnCancelarConsignacion').style.display = "block";
+                document.getElementById('nuevoEstado').value = "Pendiente";
             } else {
                 if (value.nombre_estado === "Pendiente") {
                     var observa = '<a href="#" id="btn_observa" onclick="abrirModalObservacionesCartera(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
@@ -695,12 +696,26 @@ function traerClienteModal() {
 function actualizarConsignacion() {
     validarSession();
     var datos = {};
-    datos.idConsignacion = document.getElementById('txtIdConModal').value;
-    datos.num_recibo = document.getElementById('txtNumReciboModal').value;
-    datos.valor = document.getElementById('txtValorModal').value;
-    datos.fecha_pago = document.getElementById('dateCreacionModal').value;
-    datos.id_obligacion = document.getElementById('obligacionModal').value;
-    datos.banco = document.getElementById('obligacionModal').value;
+    var nuevoEstado = document.getElementById("nuevoEstado").value;
+    if (nuevoEstado !== "") {
+        datos.idConsignacion = document.getElementById('txtIdConModal').value;
+        datos.num_recibo = document.getElementById('txtNumReciboModal').value;
+        datos.valor = document.getElementById('txtValorModal').value;
+        datos.fecha_pago = document.getElementById('dateCreacionModal').value;
+        datos.id_obligacion = document.getElementById('obligacionModal').value;
+        datos.banco = document.getElementById('sltBancoCarteraModal').value;
+        datos.estado = nuevoEstado;
+    } else {
+        datos.idConsignacion = document.getElementById('txtIdConModal').value;
+        datos.num_recibo = document.getElementById('txtNumReciboModal').value;
+        datos.valor = document.getElementById('txtValorModal').value;
+        datos.fecha_pago = document.getElementById('dateCreacionModal').value;
+        datos.id_obligacion = document.getElementById('obligacionModal').value;
+        datos.banco = document.getElementById('sltBancoCarteraModal').value;
+    }
+
+
+
 
     if (datos.num_recibo === "" || datos.valor === "" || datos.fecha_pago === "" || datos.id_obligacion === "" || datos.banco === "") {
         Swal.fire({
@@ -915,6 +930,55 @@ function generarReporteCartera() {
     }).always(function () {
 
     });
+}
+
+function cancelarConsignacion() {
+    var idConsignacion = document.getElementById("txtIdConModal").value;
+    Swal.fire({
+        title: 'Estas Seguro?',
+        text: "No Podras Revertir los Cambios!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Si, Cancelar Consignacion!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                method: "GET",
+                url: "ServletControladorConsignaciones2?accion=cancelarConsignacion&idConsignacion=" + idConsignacion
+
+            }).done(function (data) {
+                var datos = data;
+                if (datos > 0) {
+                    $('#modalEditarConsignacion').modal('hide');
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Consignacion Cancelada Correctamente',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    setTimeout(recargarPaginaCartera, 2000);
+
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al Cancelar la Observacion',
+                        text: 'Error Desconocido Reporte el Error',
+                        footer: '<a href="">Why do I have this issue?</a>'
+                    });
+
+                }
+            }).fail(function () {
+
+                window.location.replace("login.html");
+            }).always(function () {
+
+            });
+        }
+    });
+
 }
 
 function recargarPaginaCartera() {

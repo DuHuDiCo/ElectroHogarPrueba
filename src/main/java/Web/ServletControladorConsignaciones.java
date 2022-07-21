@@ -333,6 +333,8 @@ public class ServletControladorConsignaciones extends HttpServlet {
         int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
 
         Consignacion conTemp = new DaoConsignaciones().listarConsignacionesById(id_consignacion);
+        conTemp.setId_aplicado(id_usuario);
+        
 
         int guardarConsignacionesTemp = new DaoConsignaciones().guardarConsigTemp(conTemp);
         if (mensaje != null) {
@@ -359,12 +361,13 @@ public class ServletControladorConsignaciones extends HttpServlet {
     private void cancelarCambios(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
         int eliminarTempo = new DaoConsignaciones().eliminarConsigTemp();
         int eliminarObservaTemp = new DaoObservacion().eliminarObserTemp();
+        
 
         resp.setContentType("text/plain");
 
         PrintWriter out = resp.getWriter();
 
-        out.print(eliminarObservaTemp);
+        out.print(eliminarTempo);
         out.flush();
 
     }
@@ -434,11 +437,12 @@ public class ServletControladorConsignaciones extends HttpServlet {
         }
 
         if (confirmacion == 1) {
-            List<Consignacion> conTemp = new DaoConsignaciones().listarConsinacionesTempPdf();
+            int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+            List<Consignacion> conTemp = new DaoConsignaciones().listarConsinacionesTempPdf(id_usuario);
 
             String ruta = Funciones.FuncionesGenerales.generarPdf(conTemp, email);
             String nombreArchivo = Funciones.FuncionesGenerales.nombreArchivo(ruta);
-            int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+            
 
             DateTime fechaHora = Funciones.FuncionesGenerales.stringToDateTime(Funciones.FuncionesGenerales.fechaDateTime());
             Archivo file = new Archivo(nombreArchivo, ruta, fechaHora, id_usuario);
