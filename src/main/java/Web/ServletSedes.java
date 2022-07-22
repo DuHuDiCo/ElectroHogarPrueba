@@ -31,6 +31,22 @@ public class ServletSedes extends HttpServlet {
                     }
                 }
                 break;
+                case "obtenerSedeById": {
+                    try {
+                        this.obtenerSedeById(req, resp);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+                case "eliminarSede": {
+                    try {
+                        this.eliminarSede(req, resp);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
                 
 
                 default:
@@ -47,6 +63,14 @@ public class ServletSedes extends HttpServlet {
                 case "guardarSede": {
                     try {
                         this.guardarSede(req, resp);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+                case "actualizarSede": {
+                    try {
+                        this.actualizarSede(req, resp);
                     } catch (ClassNotFoundException ex) {
                         Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -94,6 +118,51 @@ public class ServletSedes extends HttpServlet {
 
         resp.setContentType("application/json");
         out.print(guardarSede);
+        out.flush();
+    }
+
+    private void obtenerSedeById(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
+        int idSede = Integer.parseInt(req.getParameter("idSede"));
+        
+        Sedes sede = new DaoSedes().obtenerSedeById(idSede);
+        
+        Gson gson = new Gson();
+        String json = gson.toJson(sede);
+        PrintWriter out = resp.getWriter();
+
+        resp.setContentType("application/json");
+        out.print(json);
+        out.flush();
+    }
+
+    private void actualizarSede(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
+        int idSede = Integer.parseInt(req.getParameter("idSede"));
+        String nombre_sede = req.getParameter("nombre_sede");
+        String municipio = req.getParameter("municipio");
+        String telefono = req.getParameter("telefono");
+        String datoPerso = req.getParameter("datoPer");
+        
+        Sedes sede = new Sedes(idSede, nombre_sede, municipio, telefono, datoPerso);
+        
+        
+        int actualizarSede = new DaoSedes().actualizarSede(sede);
+        
+        PrintWriter out = resp.getWriter();
+
+        resp.setContentType("text/plain");
+        out.print(actualizarSede);
+        out.flush();
+    }
+
+    private void eliminarSede(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
+        int idSede = Integer.parseInt(req.getParameter("idSede"));
+        
+        int eliminarSede = new DaoSedes().eliminarSede(idSede);
+        
+        PrintWriter out = resp.getWriter();
+
+        resp.setContentType("text/plain");
+        out.print(eliminarSede);
         out.flush();
     }
 

@@ -113,10 +113,11 @@ public class ServletObservaciones extends HttpServlet {
 
     private void guardarObservacion(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
         String observacion = req.getParameter("observacion");
+        int id_consignacion = Integer.parseInt(req.getParameter("idConsignacion"));
         HttpSession sesion = req.getSession(true);
         String email = (String) sesion.getAttribute("usuario");
         int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
-        int id_consignacion = new DaoConsignaciones().obtenerIdConsignacion();
+        
         Observaciones obs = new Observaciones(observacion, id_usuario, id_consignacion);
 
         int id_observacion = new DaoObservacion().guardarObservacion(obs);
