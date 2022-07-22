@@ -1,10 +1,12 @@
 package Web;
 
 import Datos.DaoSedes;
+import Datos.DaoUsuarios;
 import Dominio.Sedes;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,6 +15,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet(urlPatterns = {"/ServletSedes"})
 
@@ -47,7 +50,16 @@ public class ServletSedes extends HttpServlet {
                     }
                 }
                 break;
-                
+                case "obtenerSede": {
+                    try {
+                        this.obtenerSede(req, resp);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ServletUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (SQLException ex) {
+                    Logger.getLogger(ServletSedes.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                }
+                break;
 
                 default:
 
@@ -123,9 +135,9 @@ public class ServletSedes extends HttpServlet {
 
     private void obtenerSedeById(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
         int idSede = Integer.parseInt(req.getParameter("idSede"));
-        
+
         Sedes sede = new DaoSedes().obtenerSedeById(idSede);
-        
+
         Gson gson = new Gson();
         String json = gson.toJson(sede);
         PrintWriter out = resp.getWriter();
@@ -141,12 +153,11 @@ public class ServletSedes extends HttpServlet {
         String municipio = req.getParameter("municipio");
         String telefono = req.getParameter("telefono");
         String datoPerso = req.getParameter("datoPer");
-        
+
         Sedes sede = new Sedes(idSede, nombre_sede, municipio, telefono, datoPerso);
-        
-        
+
         int actualizarSede = new DaoSedes().actualizarSede(sede);
-        
+
         PrintWriter out = resp.getWriter();
 
         resp.setContentType("text/plain");
@@ -156,9 +167,9 @@ public class ServletSedes extends HttpServlet {
 
     private void eliminarSede(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
         int idSede = Integer.parseInt(req.getParameter("idSede"));
-        
+
         int eliminarSede = new DaoSedes().eliminarSede(idSede);
-        
+
         PrintWriter out = resp.getWriter();
 
         resp.setContentType("text/plain");
@@ -166,6 +177,18 @@ public class ServletSedes extends HttpServlet {
         out.flush();
     }
 
-    
+    private void obtenerSede(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        HttpSession session = req.getSession(true);
+        String email = (String) session.getAttribute("usuario");
+        int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+
+        String sede = new DaoSedes().obtenerSedeByIdUsuario(id_usuario);
+        PrintWriter out = resp.getWriter();
+
+        resp.setContentType("text/plain");
+        out.print(sede);
+        out.flush();
+
+    }
 
 }

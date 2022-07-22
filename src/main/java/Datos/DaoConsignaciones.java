@@ -395,8 +395,9 @@ public class DaoConsignaciones {
             if (cons.getId_observacion() != 0) {
                 stmt.setInt(11, cons.getId_observacion());
                 stmt.setInt(12, cons.getId_aplicado());
+            } else {
+                stmt.setInt(11, cons.getId_aplicado());
             }
-            stmt.setInt(11, cons.getId_aplicado());
 
             rown = stmt.executeUpdate();
 

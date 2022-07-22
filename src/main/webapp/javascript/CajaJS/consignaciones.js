@@ -23,9 +23,9 @@ function listarConsignacionesCaja() {
         var contador = 1;
 
         $.each(json, function (key, value) {
-            var imagen = '<a href="#" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
-            var observa = '<a href="#" id="btn_observa" onclick="abrirModalObservacionesCaja(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
-            var accion = '<td><a href="#" id="btn_aplicar_' + contador + '" onclick="aplicarConsignacion(' + value.idConsignacion + ', this.id);" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + observa + imagen+ '</td>';
+            var imagen = '<a href="#" id="btn_image' + value.idConsignacion + '" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
+            var observa = '<a href="#" id="btn_observa' + value.idConsignacion + '" onclick="abrirModalObservacionesCaja(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
+            var accion = '<td><a href="#" id="btn_aplicar_' + contador + '" onclick="aplicarConsignacion(' + value.idConsignacion + ', this.id);" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + observa + imagen + '</td>';
 
             $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + accion + '</tr>');
             contador = contador + 1;
@@ -51,7 +51,7 @@ function abrirModalImagen(idConsignacion) {
 
     }).done(function (data) {
         var datos = data;
-        
+
         var imagen = document.getElementById('imagenConsigancion');
         imagen.src = datos;
         $('#staticBackdropImage').modal('show');
@@ -61,7 +61,7 @@ function abrirModalImagen(idConsignacion) {
     }).always(function () {
 
     });
-    
+
 }
 
 function  abrirModalObservacionesCaja(id_consignacion) {
@@ -73,7 +73,7 @@ function  abrirModalObservacionesCaja(id_consignacion) {
 
 
     var enviar = document.getElementById('enviarObservacionConCaja').addEventListener("click", function () {
-        observacionesConsignacionC(id_consignacion);
+        observacionesConsignacion(id_consignacion);
     });
 
 }
@@ -157,7 +157,8 @@ function observacionesConsignacion(id_consignacion) {
                     timer: 2000
                 });
                 document.getElementById('txtObservacion').value = "";
-                $('#staticBackdropObser').modal('hide');
+                $('#staticBackdropObserCaja').modal('hide');
+
 
 
             } else {
@@ -199,6 +200,8 @@ select.addEventListener('change', (event) => {
         var datos = JSON.stringify(data);
         var json = JSON.parse(datos);
 
+        var sede = obtenerSede();
+        
 
         $("#dataTable tbody").empty();
 
@@ -207,17 +210,27 @@ select.addEventListener('change', (event) => {
         $.each(json, function (key, value) {
             if (valor !== 'Comprobado') {
                 var imagen = '<a href="#" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
-                var observa = '<td><a href="#" id="btn_observa" onclick="abrirModalObservacionesCaja(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>'+imagen+'</td>';
+                var observa = '<td><a href="#" id="btn_observa' + value.idConsignacion + '" onclick="abrirModalObservacionesCaja(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>' + imagen + '</td>';
                 //var accion = '<td><a href="#" id="btn_aplicar" onclick="aplicarConsignacion(' + value.idConsignacion + ');" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + observa + '</td>';
                 $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + observa + '</tr>');
                 contador = contador + 1;
             } else {
-                var imagen = '<a href="#" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
-                var observa = '<a href="#" id="btn_observa" onclick="abrirModalObservaciones(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
-                var aplicar = '<td><a href="#" id="btn_aplicar" onclick="aplicarConsignacion(' + value.idConsignacion + ')" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + observa + imagen+'</td>';
+                if (sede === value.nombre_sede) {
+                    var imagen = '<a href="#" id="btn_image' + value.idConsignacion + '" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
+                    var observa = '<a href="#" id="btn_observa' + value.idConsignacion + '" onclick="abrirModalObservaciones(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
+                    var aplicar = '<td><a href="#" id="btn_aplicar' + contador + '" onclick="aplicarConsignacion(' + value.idConsignacion + ', this.id)" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + observa + imagen + '</td>';
 
-                $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + aplicar + '</tr>');
-                contador = contador + 1;
+                    $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + aplicar + '</tr>');
+                    contador = contador + 1;
+                } else {
+                    var imagen = '<a href="#" id="btn_image' + value.idConsignacion + '" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
+                    var observa = '<a href="#" id="btn_observa' + value.idConsignacion + '" onclick="abrirModalObservaciones(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
+                    var aplicar = '<td>'+observa+imagen +'</td>';
+
+                    $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + aplicar + '</tr>');
+                    contador = contador + 1;
+                }
+
             }
 
         });
@@ -237,6 +250,17 @@ select.addEventListener('change', (event) => {
 
 });
 
+
+function obtenerSede() {
+    validarSession();
+    var sede = $.ajax({
+        method: "GET",
+        url: "ServletSedes?accion=obtenerSede",
+        async: false
+    });
+
+    return sede.responseText;
+}
 
 function aplicarConsignacion(id_consignacion, id) {
     validarSession();
@@ -268,6 +292,18 @@ function aplicarConsignacion(id_consignacion, id) {
                 timer: 2000
             });
 
+            var botonGroup = '<a href="#" class="btn btn-primary" onclick="guardarCambiosCaja();">Guardar Cambios</a> <a href="#" class="btn btn-danger" onclick="cancelarCambios();">Cancelar Cambios</a>';
+            document.getElementById('btn_groupCaja').innerHTML = botonGroup;
+
+
+            document.getElementById('sltEstadoConsignacionCaja').disabled = true;
+            document.getElementById('txtCedula').disabled = true;
+
+            $("#btn_observa" + id_consignacion).empty();
+            document.getElementById("btn_observa" + id_consignacion).outerHTML = '<a href="#"  class="btn btn-info btn-sm disabled" ><i class="fas fa-ban"></i></a>';
+            $("#btn_image" + id_consignacion).empty();
+            document.getElementById("btn_image" + id_consignacion).outerHTML = '<a href="#"  class="btn btn-success btn-sm disabled" ><i class="fas fa-ban"></i></a>';
+
 
         } else {
             Swal.fire({
@@ -278,8 +314,6 @@ function aplicarConsignacion(id_consignacion, id) {
             });
         }
 
-        var botonGroup = '<a href="#" class="btn btn-primary" onclick="guardarCambiosCaja();">Guardar Cambios</a> <a href="#" class="btn btn-danger" onclick="cancelarCambios();">Cancelar Cambios</a>';
-        document.getElementById('btn_groupCaja').innerHTML = botonGroup;
 
 
 
@@ -322,15 +356,15 @@ function consignacionesByCedulaCaja() {
 
             $.each(json, function (key, value) {
                 if (value.nombre_estado !== 'Comprobado') {
-                    var imagen = '<a href="#" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
+                    var imagen = '<a href="#" id"btn_image' + value.idConsignacion + '" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
                     //var accion = '<td><a href="#" onclick="" class="btn btn-primary btn-sm disabled" ><i class="fas fa-ban"></i></a></td>';
-                    var observa = '<td><a href="#" id="btn_observa" onclick="abrirModalObservacionesCaja(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a></td>';
-                    $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + observa + imagen+'</tr>');
+                    var observa = '<td><a href="#" id="btn_observa' + value.idConsignacion + '" onclick="abrirModalObservacionesCaja(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a></td>';
+                    $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + observa + imagen + '</tr>');
                     contador = contador + 1;
                 } else {
-                    var observa = '<a href="#" id="btn_observa" onclick="abrirModalObservacionesCaja(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
-                    var imagen = '<a href="#" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
-                    var accion = '<td><a href="#" id="btn_aplicar" onclick="aplicarConsignacion(' + value.idConsignacion + ');" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + observa + imagen+'</td>';
+                    var observa = '<a href="#" id="btn_observa' + value.idConsignacion + '" onclick="abrirModalObservacionesCaja(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
+                    var imagen = '<a href="#" id="btn_image' + value.idConsignacion + '" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
+                    var accion = '<td><a href="#" id="btn_aplicar' + value.idConsignacion + '" onclick="aplicarConsignacion(' + value.idConsignacion + ', this.id);" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + observa + imagen + '</td>';
                     $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + accion + '</tr>');
                     contador = contador + 1;
                 }

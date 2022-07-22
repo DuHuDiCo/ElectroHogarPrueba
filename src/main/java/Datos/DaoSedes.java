@@ -15,6 +15,7 @@ public class DaoSedes {
     private static final String SQL_SELECT_SEDEBYID = "SELECT * FROM sede WHERE idSede = ?";
     private static  String SQL_UPDATE_SEDE = "";
     private static final String SQL_DELETE_SEDE = "DELETE FROM sede WHERE idSede = ?";
+    private static final String SQL_SELECT_NOMBRESEDE = "SELECT sede.nombre_sede FROM usuario INNER JOIN sede ON usuario.id_sede = sede.idSede WHERE idUsuario = ?";
     
 
     public List<Sedes> listarSedes() throws ClassNotFoundException {
@@ -191,5 +192,36 @@ public class DaoSedes {
         }
         
         return row;
+    }
+    
+    public String obtenerSedeByIdUsuario(int id_usuario) throws ClassNotFoundException{
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String sede = null;
+        
+        try {
+            con = Conexion.getConnection();
+            stmt = con.prepareStatement(SQL_SELECT_NOMBRESEDE);
+            stmt.setInt(1, id_usuario);
+            
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+               
+                String nombreSede = rs.getString("nombre_sede");
+                
+                sede = nombreSede;
+               
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace(System.out);
+        } finally {
+            Conexion.close(con);
+            Conexion.close(stmt);
+            Conexion.close(rs);
+        }
+        return sede;
     }
 }

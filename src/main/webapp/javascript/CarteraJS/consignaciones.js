@@ -190,7 +190,7 @@ function guardarConsig() {
 
             });
 
-            roles(datos.nombre_rol);
+            setTimeout(recargarPaginaCartera, 2000);
 
 
 
@@ -204,8 +204,7 @@ function guardarConsig() {
             });
         }
 
-        window.location.reload();
-
+       
 
         // imprimimos la respuesta
     }).fail(function () {

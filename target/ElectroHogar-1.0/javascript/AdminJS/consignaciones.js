@@ -153,8 +153,7 @@ function guardarConsignacionConObservacion() {
         }).done(function (data) {
 
             var idConsignacion = data;
-            alert(idConsignacion);
-
+            
 
 
             if (idConsignacion !== 0) {
