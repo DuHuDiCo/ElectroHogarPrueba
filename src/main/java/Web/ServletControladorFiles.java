@@ -4,6 +4,7 @@ import Datos.DaoCartera;
 import Datos.DaoConsignaciones2;
 import Datos.DaoFiles;
 import Datos.DaoObligaciones;
+import Datos.DaoRoles;
 import Datos.DaoUsuarios;
 import Dominio.Archivo;
 import Dominio.Consignacion;
@@ -66,15 +67,38 @@ public class ServletControladorFiles extends HttpServlet {
                     }
                 }
                 break;
-                case "generarReporteCartera": {
+                case "generarReporte": {
                     try {
-                        this.generarReporteCartera(req, resp);
+                        this.generarReporte(req, resp);
                     } catch (ClassNotFoundException | SQLException ex) {
                         Logger.getLogger(ServletControladorFiles.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 break;
-
+                case "traerReportesByIdUsuario": {
+                    try {
+                        this.traerReportesByIdUsuario(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletControladorFiles.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+                case "traerReportesByFecha": {
+                    try {
+                        this.traerReportesByFecha(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletControladorFiles.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+                case "descargarReporte": {
+                    try {
+                        this.descargarReporte(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletControladorFiles.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
                 default:
                     this.accionDefaul(req, resp);
             }
@@ -289,22 +313,24 @@ public class ServletControladorFiles extends HttpServlet {
 
     }
 
-    private void generarReporteCartera(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException, SQLException {
-        List<Consignacion> consigTempCartera = new DaoConsignaciones2().listarConsignacionesTempoCartera();
+    private void generarReporte(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException, SQLException {
+        HttpSession session = req.getSession(true);
+        String email = (String) session.getAttribute("usuario");
+        int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+        List<Consignacion> consigTempCartera = new DaoConsignaciones2().listarConsignacionesTempoCartera(id_usuario);
         if (consigTempCartera.size() > 0) {
-            HttpSession session = req.getSession(true);
-            String email = (String) session.getAttribute("usuario");
+
             String generarPdf = Funciones.FuncionesGenerales.generarPdf(consigTempCartera, email);
             if (generarPdf != null || !"".equals(generarPdf)) {
-                String nombreArchivo = Funciones.FuncionesGenerales.nombreArchivo(email);
+                String nombreArchivo = Funciones.FuncionesGenerales.nombreArchivo(generarPdf);
                 System.out.println(nombreArchivo);
-                int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+                
                 Archivo file = new Archivo(nombreArchivo, generarPdf);
                 file.setId_usuario(id_usuario);
 
                 int guardarArchivo = new DaoFiles().guardarArchivoReportes(file);
 
-                int elimnarTemporalCartera = new DaoConsignaciones2().eliminarTemporalCartera();
+                int elimnarTemporalCartera = new DaoConsignaciones2().eliminarTemporalCartera(id_usuario);
                 resp.setContentType("text/plain");
 
                 PrintWriter out = resp.getWriter();
@@ -331,6 +357,75 @@ public class ServletControladorFiles extends HttpServlet {
             out.flush();
         }
 
+    }
+
+    private void traerReportesByIdUsuario(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        HttpSession session = req.getSession(true);
+        String email = (String) session.getAttribute("usuario");
+        int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+        List<Archivo> reportes = new DaoFiles().listarFilesByIdUsuario(id_usuario);
+
+        Gson gson = new Gson();
+
+        String json = gson.toJson(reportes);
+        resp.setContentType("application/json");
+
+        PrintWriter out = resp.getWriter();
+
+        out.print(json);
+        out.flush();
+    }
+
+    private void traerReportesByFecha(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        String fecha = req.getParameter("fecha");
+
+        String fecha1 = fecha + " 00:00:00";
+        String fecha2 = fecha + " 23:59:59";
+
+        HttpSession session = req.getSession(true);
+        String mail = (String) session.getAttribute("usuario");
+        int id_usuario = new DaoUsuarios().obtenerIdUsuario(mail);
+        List<Archivo> reportes = new DaoFiles().listarFilesByFecha(id_usuario, fecha1, fecha2);
+
+        Gson gson = new Gson();
+
+        String json = gson.toJson(reportes);
+        resp.setContentType("application/json");
+
+        PrintWriter out = resp.getWriter();
+
+        out.print(json);
+        out.flush();
+    }
+
+    private void descargarReporte(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        int idFile = Integer.parseInt(req.getParameter("idFile"));
+        HttpSession session = req.getSession(true);
+        String email = (String) session.getAttribute("usuario");
+        String rol = new DaoRoles().obtenerRolUsuario(email);
+        String ruta = null;
+        String nombreReporte = new DaoFiles().obtenerNombreReporte(idFile);
+        switch (rol) {
+            case "Administrador":
+                ruta = "archivos\\reportes\\Admin\\" + nombreReporte;
+                break;
+            case "Cartera":
+                ruta = "archivos\\reportes\\Cartera\\" + nombreReporte;
+                break;
+            case "Contabilidad":
+                ruta = "archivos\\reportes\\Contabilidad\\" + nombreReporte;
+                break;
+            case "Caja":
+                ruta = "archivos\\reportes\\Caja\\" + nombreReporte;
+                break;
+        }
+
+        resp.setContentType("text/plain");
+
+        PrintWriter out = resp.getWriter();
+
+        out.print(ruta);
+        out.flush();
     }
 
 }

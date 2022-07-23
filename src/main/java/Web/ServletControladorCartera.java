@@ -123,7 +123,7 @@ public class ServletControladorCartera extends HttpServlet {
 
             //guardamos la consignacion con el nuevo cliente guardado
             int idConsignacion = guardar_Consignacion(part, fecha_creacion, id_usuario, id_estado, num_recibo, fecha_pago, valor, plataforma, id_obligacionCreada);
-            int guardarConsignacionCareteraTemporal = new DaoConsignaciones2().obtenerConsignacionById(idConsignacion);
+            int guardarConsignacionCareteraTemporal = new DaoConsignaciones2().obtenerConsignacionById(idConsignacion, id_usuario);
             
 
             String respuesta = Integer.toString(idConsignacion);
@@ -137,7 +137,7 @@ public class ServletControladorCartera extends HttpServlet {
             if (isExtension(part.getSubmittedFileName(), extens)) {
 
                 int SaveConsig = guardar_Consignacion(part, fecha_creacion, id_usuario, id_estado, num_recibo, fecha_pago, valor, plataforma, id_obligacion);
-                int guardarConsignacionCareteraTemporal = new DaoConsignaciones2().obtenerConsignacionById(SaveConsig);
+                int guardarConsignacionCareteraTemporal = new DaoConsignaciones2().obtenerConsignacionById(SaveConsig, id_usuario);
                 
 
                 resp.setContentType("text/plain");

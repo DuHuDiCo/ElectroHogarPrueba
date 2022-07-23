@@ -127,7 +127,7 @@
                         <div class="bg-white py-2 collapse-inner rounded">
                             <h6 class="collapse-header">Opciones:</h6>
                             <a class="collapse-item" href="gestionConsignacionesAdmin.html">Consultar</a>
-                            <a class="collapse-item" href="#">Reportes</a>
+                            <a class="collapse-item" href="informesAdmin.html">Reportes</a>
                         </div>
                     </div>
                 </li>
@@ -531,8 +531,17 @@
 
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Lista Consignaciones</h6>
+                                     <div class="row">
+                                        <div class="col-md-10">
+                                            <h6 class="m-0 font-weight-bold text-primary">Lista Consignaciones</h6>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a onclick="generarReporte();" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generar Reporte</a>
+                                        </div>
+                                        
+                                    </div>
                                 </div>
+
                                 <div class="card-body">
 
                                     <div class="row" >
@@ -722,7 +731,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Modal Guardar Consigancion-->
                 <div class="modal fade" id="modalConsignacion" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
@@ -846,6 +855,7 @@
             <script src="javascript/CarteraJS/consignaciones.js"></script>
             <script src="javascript/ContabilidadJS/consignaciones.js"></script>
             <script src="javascript/AdminJS/consignaciones.js"></script>
+
 
 
 

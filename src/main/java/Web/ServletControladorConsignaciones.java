@@ -359,7 +359,10 @@ public class ServletControladorConsignaciones extends HttpServlet {
     }
 
     private void cancelarCambios(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
-        int eliminarTempo = new DaoConsignaciones().eliminarConsigTemp();
+        HttpSession session = req.getSession(true);
+        String email = (String)session.getAttribute("usuario");
+        int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+        int eliminarTempo = new DaoConsignaciones().eliminarConsigTemp(id_usuario);
         int eliminarObservaTemp = new DaoObservacion().eliminarObserTemp();
         
 
@@ -373,9 +376,11 @@ public class ServletControladorConsignaciones extends HttpServlet {
     }
 
     private void guardarCambios(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
-        List<Consignacion> consignaciones = new DaoConsignaciones().listarConsinacionesTemp();
         HttpSession sesion = req.getSession(true);
         String email = (String) sesion.getAttribute("usuario");
+        int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+        List<Consignacion> consignaciones = new DaoConsignaciones().listarConsinacionesTemp(id_usuario);
+        
         System.out.println(email);
         int confirmacion = 0;
         String estado = "Comprobado";
@@ -385,7 +390,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
             if (consig.getId_observacion() == 0) {
 
                 //obtenemos datos para guardar los datos de la actualizacion
-                int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+                
 
                 int id_estado = new DaoEstados().obtenerIdEstado(estado);
 
@@ -405,7 +410,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
                     int actualizarObservacionConsig = new DaoConsignaciones().actualizarObservacionConsignacion(crearObservacionTablaObservacion, consig.getIdConsignacion());
                     estado = "Devuelta";
 
-                    int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+                    
 
                     int id_estado = new DaoEstados().obtenerIdEstado(estado);
 
@@ -419,7 +424,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
                 } else {
 
                     //obtenemos datos para guardar los datos de la actualizacion
-                    int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+                    
 
                     int id_estado = new DaoEstados().obtenerIdEstado(estado);
 
@@ -437,7 +442,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
         }
 
         if (confirmacion == 1) {
-            int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+            
             List<Consignacion> conTemp = new DaoConsignaciones().listarConsinacionesTempPdf(id_usuario);
 
             String ruta = Funciones.FuncionesGenerales.generarPdf(conTemp, email);
@@ -447,7 +452,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
             DateTime fechaHora = Funciones.FuncionesGenerales.stringToDateTime(Funciones.FuncionesGenerales.fechaDateTime());
             Archivo file = new Archivo(nombreArchivo, ruta, fechaHora, id_usuario);
             int guardarFile = new DaoFiles().guardarArchivoReportes(file);
-            int eliminarTemp = new DaoConsignaciones().eliminarConsigTemp();
+            int eliminarTemp = new DaoConsignaciones().eliminarConsigTemp(id_usuario);
             int eliminarObservacionesTemp = new DaoObservacion().eliminarObserTemp();
             resp.setContentType("text/plain");
 
@@ -564,7 +569,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
             DateTime fechaHora = Funciones.FuncionesGenerales.stringToDateTime(Funciones.FuncionesGenerales.fechaDateTime());
             Archivo file = new Archivo(nombreArchivo, ruta, fechaHora, id_usuario);
             int guardarFile = new DaoFiles().guardarArchivoReportes(file);
-            int eliminarTemp = new DaoConsignaciones().eliminarConsigTempCaja();
+            int eliminarTemp = new DaoConsignaciones().eliminarConsigTempCaja(id_usuario);
             resp.setContentType("text/plain");
 
             PrintWriter out = resp.getWriter();
@@ -583,7 +588,11 @@ public class ServletControladorConsignaciones extends HttpServlet {
     }
 
     private void cancelarCambiosCaja(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
-        int eliminarTempo = new DaoConsignaciones().eliminarConsigTempCaja();
+        HttpSession session = req.getSession(true);
+        String email = (String)session.getAttribute("usuario");
+        int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+        
+        int eliminarTempo = new DaoConsignaciones().eliminarConsigTempCaja(id_usuario);
 
         resp.setContentType("text/plain");
 

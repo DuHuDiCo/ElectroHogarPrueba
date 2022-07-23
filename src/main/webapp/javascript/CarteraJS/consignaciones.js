@@ -885,10 +885,10 @@ function traerObservaciones(idConsignacion) {
 
 }
 
-function generarReporteCartera() {
+function generarReporte() {
     $.ajax({
         method: "GET",
-        url: "ServletControladorFiles?accion=generarReporteCartera"
+        url: "ServletControladorFiles?accion=generarReporte"
 
     }).done(function (data) {
         var datos = data;

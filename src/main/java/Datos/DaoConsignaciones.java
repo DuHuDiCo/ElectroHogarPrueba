@@ -22,9 +22,9 @@ public class DaoConsignaciones {
     private static final String SQL_SELECT_CONSIGNACIONESBYID = "SELECT * FROM consignacion WHERE idConsignacion = ?";
     private static final String SQL_INSERT_CONSIGNACIONTEMP = "INSERT INTO temporal_consignacion(idConsignacion, num_recibo, fecha_creacion, fecha_pago, valor, id_files, id_actualizacion, id_usuario, id_plataforma, id_obligacion, id_observacion, id_comprobado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
     private static final String SQL_INSERT_CONSIGNACIONTEMP2 = "INSERT INTO temporal_consignacion(idConsignacion, num_recibo, fecha_creacion, fecha_pago, valor, id_files, id_actualizacion, id_usuario, id_plataforma, id_obligacion, id_comprobado) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-    private static final String SQL_DELETE_CONSIGNACIONESTEMP = "DELETE FROM temporal_consignacion";
-    private static final String SQL_DELETE_CONSIGNACIONESTEMPCAJA = "DELETE FROM temporal_consignacion_caja";
-    private static final String SQL_SELECT_CONSIGNACIONESTEMP = "SELECT * FROM temporal_consignacion";
+    private static final String SQL_DELETE_CONSIGNACIONESTEMP = "DELETE FROM temporal_consignacion WHERE id_comprobado = ?";
+    private static final String SQL_DELETE_CONSIGNACIONESTEMPCAJA = "DELETE FROM temporal_consignacion_caja WHERE id_aplicado = ?";
+    private static final String SQL_SELECT_CONSIGNACIONESTEMP = "SELECT * FROM temporal_consignacion WHERE id_comprobado = ?";
     private static final String SQL_SELECT_CONSIGNACIONESTEMPCAJA = "SELECT * FROM temporal_consignacion_caja";
     private static final String SQL_SELECT_CONSIGNACIONESTEMPPDF = "SELECT temporal_consignacion.idConsignacion, temporal_consignacion.num_recibo, temporal_consignacion.fecha_creacion, temporal_consignacion.fecha_pago, temporal_consignacion.valor, actualizacion.fecha_actualizacion, estado.nombre_estado, plataforma.nombre_plataforma, obligacion.n_documento, sede.nombre_sede FROM temporal_consignacion INNER JOIN actualizacion ON temporal_consignacion.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado INNER JOIN plataforma ON temporal_consignacion.id_plataforma = plataforma.idPlataforma INNER JOIN obligacion ON temporal_consignacion.id_obligacion = obligacion.idObligacion INNER JOIN sede ON obligacion.id_sede = sede.idSede WHERE id_comprobado = ? ORDER BY temporal_consignacion.fecha_creacion DESC ";
     private static final String SQL_SELECT_CONSIGNACIONESTEMPCAJAPDF = "SELECT temporal_consignacion_caja.idConsignacion, temporal_consignacion_caja.num_recibo, temporal_consignacion_caja.fecha_creacion, temporal_consignacion_caja.fecha_pago, temporal_consignacion_caja.valor, actualizacion.fecha_actualizacion, estado.nombre_estado, plataforma.nombre_plataforma, obligacion.nombre_titular, obligacion.n_documento, sede.nombre_sede, usuario.nombre FROM temporal_consignacion_caja INNER JOIN actualizacion ON temporal_consignacion_caja.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado INNER JOIN plataforma ON temporal_consignacion_caja.id_plataforma = plataforma.idPlataforma INNER JOIN obligacion ON temporal_consignacion_caja.id_obligacion = obligacion.idObligacion INNER JOIN sede ON obligacion.id_sede = sede.idSede INNER JOIN usuario ON actualizacion.id_usuarios = usuario.idUsuario WHERE id_aplicado = ? ORDER BY temporal_consignacion_caja.fecha_creacion DESC ";
@@ -411,7 +411,7 @@ public class DaoConsignaciones {
         return rown;
     }
 
-    public int eliminarConsigTemp() throws ClassNotFoundException, SQLException {
+    public int eliminarConsigTemp(int id_usuario) throws ClassNotFoundException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
 
@@ -419,6 +419,7 @@ public class DaoConsignaciones {
         try {
             con = Conexion.getConnection();
             stmt = con.prepareStatement(SQL_DELETE_CONSIGNACIONESTEMP);
+            stmt.setInt(1, id_usuario);
 
             rown = stmt.executeUpdate();
 
@@ -432,7 +433,7 @@ public class DaoConsignaciones {
         return rown;
     }
 
-    public int eliminarConsigTempCaja() throws ClassNotFoundException, SQLException {
+    public int eliminarConsigTempCaja(int id_usuario) throws ClassNotFoundException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
 
@@ -440,6 +441,7 @@ public class DaoConsignaciones {
         try {
             con = Conexion.getConnection();
             stmt = con.prepareStatement(SQL_DELETE_CONSIGNACIONESTEMPCAJA);
+            stmt.setInt(1, id_usuario);
 
             rown = stmt.executeUpdate();
 
@@ -453,7 +455,7 @@ public class DaoConsignaciones {
         return rown;
     }
 
-    public List<Consignacion> listarConsinacionesTemp() throws ClassNotFoundException {
+    public List<Consignacion> listarConsinacionesTemp(int idusuario) throws ClassNotFoundException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -464,6 +466,7 @@ public class DaoConsignaciones {
         try {
             con = Conexion.getConnection();
             stmt = con.prepareStatement(SQL_SELECT_CONSIGNACIONESTEMP);
+            stmt.setInt(1, idusuario);
 
             rs = stmt.executeQuery();
 
@@ -479,6 +482,7 @@ public class DaoConsignaciones {
                 int id_plataforma = rs.getInt("id_plataforma");
                 int id_obligacion = rs.getInt("id_obligacion");
                 int id_observacion = rs.getInt("id_observacion");
+                int id_comprobado = rs.getInt("id_comprobado");
 
                 consignaciones = new Consignacion(idConsignacion, num_recibo, fecha_creacion, fecha_pago, valor, id_files, id_actualizacion, id_usuario, id_plataforma, id_obligacion, id_observacion);
                 consigna.add(consignaciones);

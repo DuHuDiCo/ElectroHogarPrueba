@@ -15,11 +15,11 @@ public class DaoConsignaciones2 {
     private static final String SQL_SELECT_CONSIGNACIONESAPLICADASBYIDUSUARIO = "SELECT consignacion.idConsignacion FROM consignacion INNER JOIN actualizacion ON consignacion.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado  WHERE estado.nombre_estado = 'Aplicado' AND actualizacion.id_usuarios = ? ";
     private static final String SQL_SELECT_CONSIGNACIONESDIACOMPROBADAS = "SELECT consignacion.idConsignacion FROM consignacion INNER JOIN actualizacion ON consignacion.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado INNER JOIN plataforma ON consignacion.id_plataforma = plataforma.idPlataforma INNER JOIN obligacion ON consignacion.id_obligacion = obligacion.idObligacion INNER JOIN sede ON obligacion.id_sede = sede.idSede WHERE estado.nombre_estado = ? AND consignacion.fecha_creacion = ? ORDER BY consignacion.fecha_creacion DESC ";
     private static final String SQL_UPDATE_CONSIGNACIONCARTERA = "UPDATE consignacion SET num_recibo = ?, fecha_pago = ?, valor = ?, id_plataforma = ?, id_obligacion = ? WHERE idConsignacion = ?";
-    private static final String SQL_INSERT_CONSIGNACIONTEMPORALCARTERA = "INSERT INTO temporal_consignacion_cartera(idConsignacion, num_recibo, fecha_creacion, fecha_pago, valor, id_files, id_actualizacion, id_usuario, id_plataforma, id_obligacion, id_observacion)"
-            + " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_CONSIGNACIONTEMPORALCARTERA = "INSERT INTO temporal_consignacion_cartera(idConsignacion, num_recibo, fecha_creacion, fecha_pago, valor, id_files, id_actualizacion, id_usuario, id_plataforma, id_obligacion, id_observacion, id_guardado)"
+            + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
     private static final String SQL_SELECT_CONSIGNACIONBYID = "SELECT * FROM consignacion WHERE idConsignacion = ?";
-    private static final String SQL_SELECT_CONSIGNACIONESTEMPORALESCARTERA = "SELECT temporal_consignacion_cartera.idConsignacion, temporal_consignacion_cartera.num_recibo, temporal_consignacion_cartera.fecha_creacion, temporal_consignacion_cartera.fecha_pago, temporal_consignacion_cartera.valor, actualizacion.fecha_actualizacion, estado.nombre_estado, plataforma.nombre_plataforma, obligacion.n_documento, sede.nombre_sede FROM temporal_consignacion_cartera INNER JOIN actualizacion ON temporal_consignacion_cartera.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado INNER JOIN plataforma ON temporal_consignacion_cartera.id_plataforma = plataforma.idPlataforma INNER JOIN obligacion ON temporal_consignacion_cartera.id_obligacion = obligacion.idObligacion INNER JOIN sede ON obligacion.id_sede = sede.idSede ORDER BY temporal_consignacion_cartera.fecha_creacion DESC ";
-    private static final String SQL_DELETE_TEMPORALCARTERA = "DELETE FROM temporal_consignacion_cartera";
+    private static final String SQL_SELECT_CONSIGNACIONESTEMPORALESCARTERA = "SELECT temporal_consignacion_cartera.idConsignacion, temporal_consignacion_cartera.num_recibo, temporal_consignacion_cartera.fecha_creacion, temporal_consignacion_cartera.fecha_pago, temporal_consignacion_cartera.valor, actualizacion.fecha_actualizacion, estado.nombre_estado, plataforma.nombre_plataforma, obligacion.n_documento, sede.nombre_sede FROM temporal_consignacion_cartera INNER JOIN actualizacion ON temporal_consignacion_cartera.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado INNER JOIN plataforma ON temporal_consignacion_cartera.id_plataforma = plataforma.idPlataforma INNER JOIN obligacion ON temporal_consignacion_cartera.id_obligacion = obligacion.idObligacion INNER JOIN sede ON obligacion.id_sede = sede.idSede WHERE id_guardado = ? ORDER BY temporal_consignacion_cartera.fecha_creacion DESC ";
+    private static final String SQL_DELETE_TEMPORALCARTERA = "DELETE FROM temporal_consignacion_cartera WHERE id_guardado = ?";
 
     public List<Consignacion> listarConsignacionesAplicadasByIdUsuario(int id) throws ClassNotFoundException, SQLException {
         Connection con = null;
@@ -118,7 +118,7 @@ public class DaoConsignaciones2 {
         return rown;
     }
 
-    public int obtenerConsignacionById(int id) throws ClassNotFoundException, SQLException {
+    public int obtenerConsignacionById(int id, int idusuario) throws ClassNotFoundException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -165,11 +165,11 @@ public class DaoConsignaciones2 {
             Conexion.close(rs);
         }
 
-        return guardarConsignacionCarteraTemporal(consignaciones);
+        return guardarConsignacionCarteraTemporal(consignaciones, idusuario);
 
     }
 
-    public int guardarConsignacionCarteraTemporal(Consignacion cons) throws ClassNotFoundException, SQLException {
+    public int guardarConsignacionCarteraTemporal(Consignacion cons, int idusuario) throws ClassNotFoundException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
 
@@ -188,6 +188,7 @@ public class DaoConsignaciones2 {
             stmt.setInt(9, cons.getId_plataforma());
             stmt.setInt(10, cons.getId_obligacion());
             stmt.setInt(11, cons.getId_observacion());
+            stmt.setInt(12, idusuario);
 
             rown = stmt.executeUpdate();
 
@@ -202,7 +203,7 @@ public class DaoConsignaciones2 {
     }
     
     
-    public List<Consignacion> listarConsignacionesTempoCartera() throws ClassNotFoundException {
+    public List<Consignacion> listarConsignacionesTempoCartera(int id_usuario) throws ClassNotFoundException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -213,6 +214,7 @@ public class DaoConsignaciones2 {
         try {
             con = Conexion.getConnection();
             stmt = con.prepareStatement(SQL_SELECT_CONSIGNACIONESTEMPORALESCARTERA);
+            stmt.setInt(1, id_usuario);
 
             rs = stmt.executeQuery();
 
@@ -246,13 +248,14 @@ public class DaoConsignaciones2 {
     }
     
     
-    public int eliminarTemporalCartera() throws ClassNotFoundException {
+    public int eliminarTemporalCartera(int id_usuario) throws ClassNotFoundException {
         Connection con = null;
         PreparedStatement stmt = null;
         int rown = 0;
         try {
             con = Conexion.getConnection();
             stmt = con.prepareStatement(SQL_DELETE_TEMPORALCARTERA);
+            stmt.setInt(1, id_usuario);
            
 
             rown = stmt.executeUpdate();
