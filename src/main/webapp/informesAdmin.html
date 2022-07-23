@@ -393,10 +393,16 @@
 
                                     <div class="row" >
                                         <label class="mt-2 ml-1">Filtro</label>
-                                        <div class="col-md-3" >
+                                        <div class="col-md-2" >
 
                                             <input type="date" class="form-control form-control-user" id="filtroReportes">
 
+                                        </div>
+                                        <div class="col-md-9" >
+                                            <label style="margin-left: 50px;">Estado</label>&nbsp;
+                                            <select id="sltUsuariosReportes" style="font-family: inherit; font-size: 13px;" name="plataforma" >
+
+                                            </select>
                                         </div>
 
                                         <div class="table-responsive mt-3" style="overflow-y: auto;height: 400px;" >
@@ -405,6 +411,7 @@
                                                     <tr>
                                                         <th></th>
                                                         <th>Numero Archivo</th>
+                                                        <th>Nombre Usuario</th>
                                                         <th>Fecha</th>
                                                         <th>Accion</th>
 
@@ -691,7 +698,7 @@
 <script  src="javascript/session.js"></script>
 <script  src="javascript/AdminJS/funciones.js"></script>
 <script src="javascript/CarteraJS/consignaciones.js"></script>
-<script src="javascript/CarteraJS/reportes.js"></script>
+<script src="javascript/AdminJS/reportes.js"></script>
 
 </body>
 
