@@ -211,6 +211,14 @@ public class ServletControladorConsignaciones extends HttpServlet {
                     }
                 }
                 break;
+                case "ConsignacionTemporalDevolver": {
+                    try {
+                        this.ConsignacionTemporalDevolver(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
+                        Logger.getLogger(ServletControladorConsignaciones.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
 
             }
         }
@@ -326,7 +334,6 @@ public class ServletControladorConsignaciones extends HttpServlet {
 
     private void ConsignacionTemporal(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
         int id_consignacion = Integer.parseInt(req.getParameter("idConsignacion"));
-        String mensaje = req.getParameter("observacion");
 
         HttpSession session = req.getSession(true);
         String email = (String) session.getAttribute("usuario");
@@ -337,20 +344,14 @@ public class ServletControladorConsignaciones extends HttpServlet {
 
         int guardarConsignacionesTemp = new DaoConsignaciones().guardarConsigTemp(conTemp);
 
-        
-        int observacionTemporal = new DaoObservacion().observacionTemporal(mensaje, id_usuario);
-        
-        int enviarIdConsignacion = new DaoObservacion().enviarIdConsignacion(conTemp.getIdConsignacion(), observacionTemporal);
-
-        int actualizarConsigObser = new DaoConsignaciones().actualizarObservacionConsignacionTemporal(observacionTemporal, conTemp.getIdConsignacion());
-       
         id_consignacion = 0;
+        conTemp = null;
 
         resp.setContentType("text/plain");
 
         PrintWriter out = resp.getWriter();
 
-        out.print(actualizarConsigObser);
+        out.print(guardarConsignacionesTemp);
         out.flush();
     }
 
@@ -656,6 +657,32 @@ public class ServletControladorConsignaciones extends HttpServlet {
         PrintWriter out = resp.getWriter();
 
         out.print(congs.size());
+        out.flush();
+    }
+
+    private void ConsignacionTemporalDevolver(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        int idCosignacion = Integer.parseInt(req.getParameter("idConsignacion"));
+        System.out.println(idCosignacion);
+        String mensaje = req.getParameter("observacion");
+        
+        HttpSession session = req.getSession(true);
+        String email = (String)session.getAttribute("usuario");
+        int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
+        
+        Consignacion conTemp = new DaoConsignaciones().listarConsignacionesById(idCosignacion);
+        conTemp.setId_aplicado(id_usuario);
+        int temporal = new DaoConsignaciones().guardarConsigTemp(conTemp);
+
+        int observacionTemporal = new DaoObservacion().observacionTemporal(mensaje, id_usuario);
+
+        int enviarIdConsignacion = new DaoObservacion().enviarIdConsignacion(conTemp.getIdConsignacion(), observacionTemporal);
+
+        int actualizarConsigObser = new DaoConsignaciones().actualizarObservacionConsignacionTemporal(observacionTemporal, conTemp.getIdConsignacion());
+        resp.setContentType("text/plain");
+
+        PrintWriter out = resp.getWriter();
+
+        out.print(actualizarConsigObser);
         out.flush();
     }
 }
