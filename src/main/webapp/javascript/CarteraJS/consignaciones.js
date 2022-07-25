@@ -20,8 +20,11 @@ function abrirModalObservaciones() {
     var valor = document.getElementById('txtValor').value;
     var fecha = document.getElementById('dateCreacion').value;
     var sede = document.getElementById('sltBancoCartera').value;
+    var cliente = document.getElementById('obligacionModal').checked;
+
     var file = document.getElementById('file').files;
-    if (recibo === "" || valor === "" || fecha === "" || sede === "" || file.length === 0) {
+    if (recibo === "" || valor === "" || fecha === "" || sede === "" || file.length === 0 || !cliente) {
+        alert(cliente);
         Swal.fire({
             icon: 'error',
             title: 'Error al guardar la consignacion',
@@ -204,7 +207,7 @@ function guardarConsig() {
             });
         }
 
-       
+
 
         // imprimimos la respuesta
     }).fail(function () {
@@ -273,7 +276,7 @@ function cargarBancos(id, dato) {
 
 
         $.each(json, function (key, value) {
-            if (value.nombre_plataforma === dato) {
+            if (value.idPlataforma === dato) {
                 $("#" + id).append('<option value="' + value.idPlataforma + '" selected>' + value.nombre_plataforma + '--' + value.tipo_pago + '</option>');
             } else {
                 $("#" + id).append('<option value="' + value.idPlataforma + '" >' + value.nombre_plataforma + '--' + value.tipo_pago + '</option>');
@@ -532,6 +535,8 @@ function consignacionesCedula() {
 function traerCliente() {
     validarSession();
     var cedula = document.getElementById('txtCliente').value;
+    document.getElementById('validacionVacio').value = cedula;
+    
 
 
     $.ajax({
@@ -541,10 +546,12 @@ function traerCliente() {
     }).done(function (data) {
         var datos = JSON.stringify(data);
         var json = JSON.parse(datos);
-
+        document.getElementById('nuevoCliente').style.display = "none";
+        document.getElementById('cedulaCliente').style.display = "none";
+        document.getElementById('sltSedeCon').style.display = "none";
 
         $("#tblCliente tbody").empty();
-
+        
 
         if (json.length > 0) {
             document.getElementById('nuevoCliente').style.display = "none";
@@ -602,7 +609,7 @@ function editarConsignacion(idConsignacion) {
 
         var datos = JSON.stringify(data);
         var json = JSON.parse(datos);
-
+        console.log(json);
 
 
 
@@ -617,8 +624,10 @@ function editarConsignacion(idConsignacion) {
 
             $("#tblClienteModal tbody").empty();
             $("#tblClienteModal tbody").append('<tr> <td><input type="checkbox" value=' + json.id_obligacion + ' id="obligacionModal" name="obligacion" required checked></td><td>' + json.nombre_titular + '</td><td>' + json.valor_obligacion + '</td><td>' + json.fecha_obligacion + '</td><td>' + json.nombre_sede + '</td></tr>');
+            $("#sltBancoCarteraModal").empty();
 
-            cargarBancos('sltBancoCarteraModal', json.nombre_plataforma);
+            cargarBancos('sltBancoCarteraModal', json.id_plataforma);
+
 
         } else {
             Swal.fire({
@@ -696,6 +705,7 @@ function actualizarConsignacion() {
     validarSession();
     var datos = {};
     var nuevoEstado = document.getElementById("nuevoEstado").value;
+    var valid = document.getElementById('obligacionModal').checked;
     if (nuevoEstado !== "") {
         datos.idConsignacion = document.getElementById('txtIdConModal').value;
         datos.num_recibo = document.getElementById('txtNumReciboModal').value;
@@ -712,11 +722,11 @@ function actualizarConsignacion() {
         datos.id_obligacion = document.getElementById('obligacionModal').value;
         datos.banco = document.getElementById('sltBancoCarteraModal').value;
     }
+    
 
 
 
-
-    if (datos.num_recibo === "" || datos.valor === "" || datos.fecha_pago === "" || datos.id_obligacion === "" || datos.banco === "") {
+    if (datos.num_recibo === "" || datos.valor === "" || datos.fecha_pago === "" || datos.id_obligacion === "" || datos.banco === "" || !valid) {
         Swal.fire({
             icon: 'error',
             title: 'Error al Actualizar la Consignacion',

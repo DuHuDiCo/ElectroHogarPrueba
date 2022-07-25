@@ -140,12 +140,9 @@ public class ServletObservaciones extends HttpServlet {
         String email = (String) session.getAttribute("usuario");
         int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
 
-        Observaciones obser = new Observaciones();
-        obser.setObservacion(mensaje);
-        obser.setId_usuario(id_usuario);
-        obser.setId_consignacion(idConsignacion);
+        
 
-        int observacionTemporal = new DaoObservacion().observacionTemporal(obser);
+        int observacionTemporal = new DaoObservacion().observacionTemporal(mensaje, id_usuario);
         resp.setContentType("text/plain");
 
         PrintWriter out = resp.getWriter();

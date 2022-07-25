@@ -13,7 +13,17 @@ function abrirModalObservaciones() {
     var fecha = document.getElementById('dateCreacion').value;
     var sede = document.getElementById('sltBancoCartera').value;
     var file = document.getElementById('file').files;
-    if (recibo === "" || valor === "" || fecha === "" || sede === "" || file.length === 0) {
+    var cliente = null;
+    var valid = document.getElementById('validacionVacio').value;
+
+
+    if (valid !== "") {
+        cliente = document.getElementById('obligacion').checked;
+    }else{
+        cliente = false;
+    }
+    if (recibo === "" || valor === "" || fecha === "" || sede === "" || file.length === 0 || !cliente) {
+
         Swal.fire({
             icon: 'error',
             title: 'Error al guardar la consignacion',
@@ -108,8 +118,10 @@ function cargarDatosBanco() {
         $.each(json, function (key, value) {
             if (value.idPlataforma === 1) {
                 $("#sltBancoCartera").append('<option value="' + value.idPlataforma + '" >' + value.nombre_plataforma + '--' + value.tipo_pago + '</option>');
+            }else{
+                $("#sltBancoCartera").append('<option value="' + value.idPlataforma + '" >' + value.nombre_plataforma + '--' + value.tipo_pago + '</option>');
             }
-            $("#sltBancoCartera").append('<option value="' + value.idPlataforma + '" >' + value.nombre_plataforma + '--' + value.tipo_pago + '</option>');
+            
         });
 
 
