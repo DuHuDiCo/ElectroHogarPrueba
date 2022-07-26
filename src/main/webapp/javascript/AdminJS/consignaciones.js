@@ -19,7 +19,7 @@ function abrirModalObservaciones() {
 
     if (valid !== "") {
         cliente = document.getElementById('obligacion').checked;
-    }else{
+    } else {
         cliente = false;
     }
     if (recibo === "" || valor === "" || fecha === "" || sede === "" || file.length === 0 || !cliente) {
@@ -118,10 +118,10 @@ function cargarDatosBanco() {
         $.each(json, function (key, value) {
             if (value.idPlataforma === 1) {
                 $("#sltBancoCartera").append('<option value="' + value.idPlataforma + '" >' + value.nombre_plataforma + '--' + value.tipo_pago + '</option>');
-            }else{
+            } else {
                 $("#sltBancoCartera").append('<option value="' + value.idPlataforma + '" >' + value.nombre_plataforma + '--' + value.tipo_pago + '</option>');
             }
-            
+
         });
 
 
@@ -322,13 +322,14 @@ function  abrirModalObservacionesAdmin(id_consignacion) {
     $('#staticBackdropObserAdmin').modal('show');
 
     traerObservaciones(id_consignacion);
-
-
-    var enviar = document.getElementById('enviarObservacionCon').addEventListener("click", function () {
-        observacionesConsignacion(id_consignacion);
-    });
+    document.getElementById('idConsignacion').value = id_consignacion;
 
 }
+
+var enviar = document.getElementById('enviarObservacionCon').addEventListener("click", function () {
+    var id_consignacion = document.getElementById('idConsignacion').value;
+    observacionesConsignacion(id_consignacion);
+});
 
 function observacionesConsignacion(id_consignacion) {
     validarSession();

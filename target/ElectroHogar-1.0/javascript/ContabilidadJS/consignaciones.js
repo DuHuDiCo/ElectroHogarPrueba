@@ -79,13 +79,16 @@ function abrirModalImagen(idConsignacion) {
 
 function abrirModal(idConsignacion, id) {
 
-
-    
-    
     $('#staticBackdrop').modal('show');
     document.getElementById('idConsignacion').value = idConsignacion;
 
 }
+
+var cerrar = document.getElementById('cerrarModal');
+cerrar.addEventListener('click', (event)=>{
+   
+   document.getElementById('observacionDevolucion').value = " ";
+});
 
 
 
