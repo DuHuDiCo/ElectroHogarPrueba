@@ -20,6 +20,8 @@ public class DaoConsignaciones2 {
     private static final String SQL_SELECT_CONSIGNACIONBYID = "SELECT * FROM consignacion WHERE idConsignacion = ?";
     private static final String SQL_SELECT_CONSIGNACIONESTEMPORALESCARTERA = "SELECT temporal_consignacion_cartera.idConsignacion, temporal_consignacion_cartera.num_recibo, temporal_consignacion_cartera.fecha_creacion, temporal_consignacion_cartera.fecha_pago, temporal_consignacion_cartera.valor, actualizacion.fecha_actualizacion, estado.nombre_estado, plataforma.nombre_plataforma, obligacion.n_documento, sede.nombre_sede FROM temporal_consignacion_cartera INNER JOIN actualizacion ON temporal_consignacion_cartera.id_actualizacion = actualizacion.idActualizacion INNER JOIN estado ON actualizacion.id_estado = estado.idEstado INNER JOIN plataforma ON temporal_consignacion_cartera.id_plataforma = plataforma.idPlataforma INNER JOIN obligacion ON temporal_consignacion_cartera.id_obligacion = obligacion.idObligacion INNER JOIN sede ON obligacion.id_sede = sede.idSede WHERE id_guardado = ? ORDER BY temporal_consignacion_cartera.fecha_creacion DESC ";
     private static final String SQL_DELETE_TEMPORALCARTERA = "DELETE FROM temporal_consignacion_cartera WHERE id_guardado = ?";
+    private static final String SQL_DELETE_CONSIGNACIONBYID = "DELETE FROM temporal_consignacion WHERE idConsignacion = ?";
+    private static final String SQL_UPDATE_ACTUALIZACIONCONSIGNACIONTEMPORALCAJA = "UPDATE temporal_consignacion_caja SET id_actualizacion = ? WHERE idConsignacion = ?";
 
     public List<Consignacion> listarConsignacionesAplicadasByIdUsuario(int id) throws ClassNotFoundException, SQLException {
         Connection con = null;
@@ -201,8 +203,7 @@ public class DaoConsignaciones2 {
         }
         return rown;
     }
-    
-    
+
     public List<Consignacion> listarConsignacionesTempoCartera(int id_usuario) throws ClassNotFoundException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -246,8 +247,7 @@ public class DaoConsignaciones2 {
         return consigna;
 
     }
-    
-    
+
     public int eliminarTemporalCartera(int id_usuario) throws ClassNotFoundException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -256,7 +256,6 @@ public class DaoConsignaciones2 {
             con = Conexion.getConnection();
             stmt = con.prepareStatement(SQL_DELETE_TEMPORALCARTERA);
             stmt.setInt(1, id_usuario);
-           
 
             rown = stmt.executeUpdate();
 
@@ -270,4 +269,47 @@ public class DaoConsignaciones2 {
         return rown;
     }
 
+    public int eliminarConsignacionById(int id_consignacion) throws ClassNotFoundException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        int rown = 0;
+        try {
+            con = Conexion.getConnection();
+            stmt = con.prepareStatement(SQL_DELETE_CONSIGNACIONBYID);
+            stmt.setInt(1, id_consignacion);
+
+            rown = stmt.executeUpdate();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace(System.out);
+        } finally {
+            Conexion.close(con);
+            Conexion.close(stmt);
+
+        }
+        return rown;
+    }
+
+    public int actualizarEstadoConsigTempCaja(int id_actu, int id_con) throws ClassNotFoundException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        int rown = 0;
+        try {
+            con = Conexion.getConnection();
+            stmt = con.prepareStatement(SQL_UPDATE_ACTUALIZACIONCONSIGNACIONTEMPORALCAJA);
+            
+            stmt.setInt(1, id_actu);
+            stmt.setInt(2, id_con);
+
+            rown = stmt.executeUpdate();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace(System.out);
+        } finally {
+            Conexion.close(con);
+            Conexion.close(stmt);
+
+        }
+        return rown;
+    }
 }

@@ -2,6 +2,7 @@ package Web;
 
 import Datos.DaoActualizacion;
 import Datos.DaoConsignaciones;
+import Datos.DaoConsignaciones2;
 import Datos.DaoEstados;
 import Datos.DaoFiles;
 import Datos.DaoObservacion;
@@ -164,6 +165,22 @@ public class ServletControladorConsignaciones extends HttpServlet {
                     try {
                         this.consignacionesAplicadas(req, resp);
                     } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ServletControladorConsignaciones.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+                case "cancelarCambiosIndividual": {
+                    try {
+                        this.cancelarCambiosIndividual(req, resp);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ServletControladorConsignaciones.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+                case "cancelarDevolucionConsignacionById": {
+                    try {
+                        this.cancelarDevolucionConsignacionById(req, resp);
+                    } catch (ClassNotFoundException | SQLException ex) {
                         Logger.getLogger(ServletControladorConsignaciones.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -534,17 +551,45 @@ public class ServletControladorConsignaciones extends HttpServlet {
         HttpSession sesion = req.getSession(true);
         String email = (String) sesion.getAttribute("usuario");
         int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
-        List<Consignacion> consignaciones = new DaoConsignaciones().listarConsinacionesTempCajaPdf(id_usuario);
+        String estadoComp = "Comprobado";
+        int idEstadoComp = new DaoEstados().obtenerIdEstado(estadoComp);
+        List<Consignacion> consignaciones = new DaoConsignaciones().listarConsinacionesTempCajaPdf(id_usuario, idEstadoComp);
+        List<Consignacion> consig = new DaoConsignaciones().listarConsinacionesTempCajaByIdUsuario(id_usuario);
         int confirmacion = 0;
+        String estadoAp = "Aplicado";
+        int idEstadoAp = new DaoEstados().obtenerIdEstado(estadoAp);
+        String estadoDeC = "Devuelta-Caja";
+        int idEstadoDevC = new DaoEstados().obtenerIdEstado(estadoDeC);
 
-        Consignacion cons = null;
-        for (Consignacion con : consignaciones) {
+        for (Consignacion con : consig) {
+            int idEstado = new DaoActualizacion().obtenerIdEstadoByIdActualizacion(con.getId_actualizacion());
 
-            int id_estado = new DaoEstados().obtenerIdEstado("Aplicado");
-            Actualizacion actu = new Actualizacion(id_estado, id_usuario);
-            int guardarActu = new DaoActualizacion().guardarActualizacion(actu);
-            int actualizarConsig = new DaoConsignaciones().actualizarEstadoConsig(guardarActu, con.getIdConsignacion());
-            confirmacion = actualizarConsig;
+            if (idEstado == idEstadoAp) {
+
+                Actualizacion actu = new Actualizacion(idEstadoAp, id_usuario);
+                int guardarActu = new DaoActualizacion().guardarActualizacion(actu);
+                int actualizarConsig = new DaoConsignaciones().actualizarEstadoConsig(guardarActu, con.getIdConsignacion());
+                confirmacion = actualizarConsig;
+            } else {
+                if (idEstado == idEstadoComp) {
+                    Actualizacion actu = new Actualizacion(idEstadoAp, id_usuario);
+                    int guardarActu = new DaoActualizacion().guardarActualizacion(actu);
+                    int actualizarConsig = new DaoConsignaciones().actualizarEstadoConsig(guardarActu, con.getIdConsignacion());
+                    confirmacion = actualizarConsig;
+                } else {
+                    Observaciones obs = new DaoObservacion().obtenerObservacionTemporalById(con.getId_observacion());
+
+                    int crearObserva = new DaoObservacion().guardarObservacion(obs);
+                    int actualizarObservaConsigna = new DaoConsignaciones().actualizarObservacionConsignacion(crearObserva, con.getIdConsignacion());
+                    Actualizacion actu = new Actualizacion(idEstadoDevC, id_usuario);
+                    int actuNew = new DaoActualizacion().guardarActualizacion(actu);
+                    int actuConsig = new DaoConsignaciones().actualizarEstadoConsig(actuNew, con.getIdConsignacion());
+
+                    confirmacion = actuConsig;
+                }
+
+            }
+
         }
 
         if (confirmacion == 1) {
@@ -556,11 +601,12 @@ public class ServletControladorConsignaciones extends HttpServlet {
             Archivo file = new Archivo(nombreArchivo, ruta, fechaHora, id_usuario);
             int guardarFile = new DaoFiles().guardarArchivoReportes(file);
             int eliminarTemp = new DaoConsignaciones().eliminarConsigTempCaja(id_usuario);
+            int eliminarObserTem = new DaoObservacion().eliminarObserTempByIdUsuario(id_usuario);
             resp.setContentType("text/plain");
 
             PrintWriter out = resp.getWriter();
 
-            out.print(eliminarTemp);
+            out.print(eliminarObserTem);
             out.flush();
         } else {
             resp.setContentType("text/plain");
@@ -579,6 +625,7 @@ public class ServletControladorConsignaciones extends HttpServlet {
         int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
 
         int eliminarTempo = new DaoConsignaciones().eliminarConsigTempCaja(id_usuario);
+        int eliminarObserTem = new DaoObservacion().eliminarObserTempByIdUsuario(id_usuario);
 
         resp.setContentType("text/plain");
 
@@ -664,16 +711,16 @@ public class ServletControladorConsignaciones extends HttpServlet {
         int idCosignacion = Integer.parseInt(req.getParameter("idConsignacion"));
         System.out.println(idCosignacion);
         String mensaje = req.getParameter("observacion");
-        
+
         HttpSession session = req.getSession(true);
-        String email = (String)session.getAttribute("usuario");
+        String email = (String) session.getAttribute("usuario");
         int id_usuario = new DaoUsuarios().obtenerIdUsuario(email);
-        
+
         Consignacion conTemp = new DaoConsignaciones().listarConsignacionesById(idCosignacion);
         conTemp.setId_aplicado(id_usuario);
         int temporal = new DaoConsignaciones().guardarConsigTemp(conTemp);
 
-        int observacionTemporal = new DaoObservacion().observacionTemporal(mensaje, id_usuario);
+        int observacionTemporal = new DaoObservacion().observacionTemporal(mensaje, id_usuario, idCosignacion);
 
         int enviarIdConsignacion = new DaoObservacion().enviarIdConsignacion(conTemp.getIdConsignacion(), observacionTemporal);
 
@@ -684,5 +731,33 @@ public class ServletControladorConsignaciones extends HttpServlet {
 
         out.print(actualizarConsigObser);
         out.flush();
+    }
+
+    private void cancelarCambiosIndividual(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, IOException {
+        int idConsignacion = Integer.parseInt(req.getParameter("idConsignacion"));
+        int eliminarConsingacion = new DaoConsignaciones2().eliminarConsignacionById(idConsignacion);
+        resp.setContentType("text/plain");
+
+        PrintWriter out = resp.getWriter();
+
+        out.print(eliminarConsingacion);
+        out.flush();
+    }
+
+    private void cancelarDevolucionConsignacionById(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        int idConsignacion = Integer.parseInt(req.getParameter("idConsignacion"));
+
+        int id_observacion_temporal = new DaoObservacion().obtenerIdObservacionTemporalByIdConsignacion(idConsignacion);
+
+        int eliminar_observacion_temporal = new DaoObservacion().eliminarObserTempById(id_observacion_temporal);
+
+        int eliminar_consignacion_temporal = new DaoConsignaciones().eliminarConsigTempById(idConsignacion);
+        resp.setContentType("text/plain");
+
+        PrintWriter out = resp.getWriter();
+
+        out.print(eliminar_consignacion_temporal);
+        out.flush();
+
     }
 }
