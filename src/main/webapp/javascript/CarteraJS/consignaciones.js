@@ -15,7 +15,7 @@ const $form = document.querySelector('#formConsignacion');
 
 
 
-function abrirModalObservaciones() {
+function abrirModalObservacionesGuardar() {
     var recibo = document.getElementById('txtNumRecibo').value;
     var valor = document.getElementById('txtValor').value;
     var fecha = document.getElementById('dateCreacion').value;
@@ -75,7 +75,7 @@ function abrirModalObservaciones() {
 }
 
 
-function guardarConsignacionConObservacion() {
+function guardarConsignacionConObservacionCartera() {
     validarSession();
     var obser = document.getElementById('observacionGuardarConsig').value;
     if (obser === "") {
@@ -87,57 +87,164 @@ function guardarConsignacionConObservacion() {
         });
     } else {
         validarSession();
-        var form = document.getElementById('formConsignacion');
-        var formData = new FormData(form);
-
-
-        $.ajax({
-            method: "POST",
-            url: "ServletControladorCartera?accion=guardarConsignacion",
-            data: formData,
-            processData: false,
-            contentType: false
-
-        }).done(function (data) {
-
-            var idConsignacion = data;
-
-
-
-
-            if (idConsignacion !== 0) {
-
-                crearObservacion(obser, idConsignacion);
-
-
-
-
-
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error al guardar la consignacion',
-                    text: 'No se logro guardar la consignacion, por favor revise bien la informacion o reporte el error',
-                    footer: '<a href="">Why do I have this issue?</a>'
-                });
-            }
-
-
-
-
-            // imprimimos la respuesta
-        }).fail(function () {
-
-            window.location.replace("login.html");
-        }).always(function () {
-
-        });
-
-
-
-
+        validarExistencia(obser);
+        
 
     }
+}
+
+function validarExistencia(obser) {
+     $('#modalConsignacion').modal('hide');
+    var datos = {};
+    datos.valor = document.getElementById('txtValor').value;
+    datos.fecha = document.getElementById('dateCreacion').value;
+
+    $.ajax({
+        method: "GET",
+        url: "ServletControladorConsignaciones2?accion=validarConsignacion",
+        data: datos,
+        dataType: 'JSON'
+
+
+    }).done(function (data) {
+
+        var dato = data;
+
+        if (dato > 0) {
+            document.getElementById('observa').value = obser;
+
+            traerConsinacionesFechaValor(datos);
+
+        } else {
+            guardarConsignacion(obser);
+        }
+        // imprimimos la respuesta
+    }).fail(function () {
+
+        window.location.replace("login.html");
+    }).always(function () {
+
+    });
+}
+
+function validarExistenciaSinObserva() {
+    var datos = {};
+    datos.valor = document.getElementById('txtValor').value;
+    datos.fecha = document.getElementById('dateCreacion').value;
+
+    $.ajax({
+        method: "GET",
+        url: "ServletControladorConsignaciones2?accion=validarConsignacion",
+        data: datos,
+        dataType: 'JSON'
+
+
+    }).done(function (data) {
+
+        var dato = data;
+
+        if (dato > 0) {
+            
+            traerConsinacionesFechaValor(datos);
+
+        } else {
+            guardarConsig();
+        }
+        // imprimimos la respuesta
+    }).fail(function () {
+
+        window.location.replace("login.html");
+    }).always(function () {
+
+    });
+}
+
+function traerConsinacionesFechaValor(datos) {
+    $.ajax({
+        method: "GET",
+        url: "ServletControladorConsignaciones2?accion=listarConsignacionesFechaValor",
+        data: datos,
+        dataType: 'JSON'
+
+
+    }).done(function (data) {
+
+        var dato = JSON.stringify(data);
+        var json = JSON.parse(dato);
+        
+
+        if (Object.keys(json).length > 0) {
+            $('#ModalConsignacionesIguales').modal('show');
+            $("#tableIgual tbody").empty();
+            var contador = 1;
+            $.each(json, function (key, value) {
+                $("#tableIgual tbody").append('<tr> <td>' + contador + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.valor + '</td><td>' + value.nombre_titular + '</td><td>' + value.nombre_sede + '</td></tr>');
+                contador = contador + 1;
+            });
+
+        } else {
+
+        }
+        // imprimimos la respuesta
+    }).fail(function () {
+
+        window.location.replace("login.html");
+    }).always(function () {
+
+    });
+}
+
+function guardarConsignacion() {
+    var form = document.getElementById('formConsignacion');
+    var formData = new FormData(form);
+    var obser = document.getElementById('observa').value;
+    alert(obser);
+
+
+    $.ajax({
+        method: "POST",
+        url: "ServletControladorCartera?accion=guardarConsignacion",
+        data: formData,
+        processData: false,
+        contentType: false
+
+    }).done(function (data) {
+
+        var idConsignacion = data;
+
+        if (idConsignacion !== 0) {
+
+            crearObservacion(obser, idConsignacion);
+
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al guardar la consignacion',
+                text: 'No se logro guardar la consignacion, por favor revise bien la informacion o reporte el error',
+                footer: '<a href="">Why do I have this issue?</a>'
+            });
+        }
+
+        // imprimimos la respuesta
+    }).fail(function () {
+
+        window.location.replace("login.html");
+    }).always(function () {
+
+    });
+
+}
+
+function validarGuardar(){
+    var obs = document.getElementById('observa').value;
+    alert(obs);
+    
+    if(obs === ""){
+        guardarConsig();
+    }else{
+        guardarConsignacion();
+    }
+    
 }
 
 function crearObservacion(obser, idConsignacion) {
@@ -193,9 +300,9 @@ function crearObservacion(obser, idConsignacion) {
 
 
 
-function noCrearObservacion() {
+function noCrearObservacionCartera() {
     validarSession();
-    guardarConsig();
+    validarExistenciaSinObserva();
 }
 
 function guardarConsig() {
@@ -688,8 +795,8 @@ function editarConsignacion(idConsignacion) {
             $("#sltBancoCarteraModal").empty();
 
             cargarBancos('sltBancoCarteraModal', json.id_plataforma);
-            
-            
+
+
 
         } else {
             Swal.fire({

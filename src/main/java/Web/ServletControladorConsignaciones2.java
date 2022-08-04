@@ -10,6 +10,7 @@ import Datos.DaoUsuarios;
 import Dominio.Actualizacion;
 import Dominio.Consignacion;
 import Dominio.Observaciones;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Date;
@@ -120,6 +121,26 @@ public class ServletControladorConsignaciones2 extends HttpServlet {
                 case "cancelarCambiosIndividual": {
                     try {
                         this.cancelarCambiosIndividual(req, resp);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ServletControladorConsignaciones.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(ServletControladorConsignaciones2.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+                case "validarConsignacion": {
+                    try {
+                        this.validarConsignacion(req, resp);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ServletControladorConsignaciones.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(ServletControladorConsignaciones2.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+                case "listarConsignacionesFechaValor": {
+                    try {
+                        this.listarConsignacionesFechaValor(req, resp);
                     } catch (ClassNotFoundException ex) {
                         Logger.getLogger(ServletControladorConsignaciones.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (SQLException ex) {
@@ -385,6 +406,37 @@ public class ServletControladorConsignaciones2 extends HttpServlet {
             out.flush();
         }
 
+    }
+
+    private void validarConsignacion(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        float valor = Float.valueOf(req.getParameter("valor"));
+        Date fecha = Funciones.FuncionesGenerales.fechaSQL(req.getParameter("fecha"), "yyyy-MM-dd");
+
+        int validar = new DaoConsignaciones2().ListarConsignacionFechaValor(fecha, valor);
+
+        resp.setContentType("text/plain");
+
+        PrintWriter out = resp.getWriter();
+
+        out.print(validar);
+        out.flush();
+
+    }
+
+    private void listarConsignacionesFechaValor(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, IOException {
+        float valor = Float.valueOf(req.getParameter("valor"));
+        Date fecha = Funciones.FuncionesGenerales.fechaSQL(req.getParameter("fecha"), "yyyy-MM-dd");
+        
+        List<Consignacion> cons = new DaoConsignaciones2().validarConsignacionFechaValor(fecha, valor);
+        Gson gson = new Gson();
+
+        String json = gson.toJson(cons);
+        resp.setContentType("application/json");
+
+        PrintWriter out = resp.getWriter();
+
+        out.print(json);
+        out.flush();
     }
 
 }

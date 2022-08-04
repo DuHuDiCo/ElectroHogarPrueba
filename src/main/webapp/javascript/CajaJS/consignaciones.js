@@ -100,7 +100,7 @@ function devolverConsignacionCaja(id_consignacion, observacion) {
             document.getElementById('txtCedula').disabled = true;
 
             $("#btn_devolver" + id_consignacion).empty();
-            document.getElementById("btn_devolver" + id_consignacion).outerHTML = '<button id="btn_cancelar'+id_consignacion+'" onclick="cancelarCambiosIndividual(' + id_consignacion + ')" class="btn btn-danger btn-sm " ><i class="fas fa-times"></i></button>';
+            document.getElementById("btn_devolver" + id_consignacion).outerHTML = '<button id="btn_cancelar'+id_consignacion+'" onclick="cancelarCambiosIndividualDevolver(' + id_consignacion + ')" class="btn btn-danger btn-sm " ><i class="fas fa-times"></i></button>';
             $("#btn_observa" + id_consignacion).empty();
             document.getElementById("btn_observa" + id_consignacion).outerHTML = '<a href="#" id="btn_observa'+id_consignacion+'" class="btn btn-info btn-sm disabled" ><i class="fas fa-ban"></i></a>';
             $("#btn_image" + id_consignacion).empty();
@@ -303,7 +303,7 @@ select.addEventListener('change', (event) => {
                     var imagen = '<a href="#" id="btn_image' + value.idConsignacion + '" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
                     var observa = '<a href="#" id="btn_observa' + value.idConsignacion + '" onclick="abrirModalObservaciones(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
                     var devolver = '<button  id="btn_devolver' + value.idConsignacion + '" onclick="abrirModalDevolucion(' + value.idConsignacion + ', this.id);" class="btn btn-warning btn-sm"><i class="fas fa-backward"></i></button>';
-                    var aplicar = '<td><a href="#" id="btn_aplicar' + contador + '" onclick="aplicarConsignacion(' + value.idConsignacion + ', this.id)" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + devolver + observa + imagen + '</td>';
+                    var aplicar = '<td><a href="#" id="btn_aplicar_' + value.idConsignacion + '" onclick="aplicarConsignacion(' + value.idConsignacion + ', this.id)" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + devolver + observa + imagen + '</td>';
 
                     $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + aplicar + '</tr>');
                     contador = contador + 1;
@@ -380,7 +380,7 @@ function aplicarConsignacion(id_consignacion, id) {
             document.getElementById('sltEstadoConsignacionCaja').disabled = true;
             document.getElementById('txtCedula').disabled = true;
 
-            $("#btn_aplicar" + id_consignacion).empty();
+            $("#btn_aplicar_" + id_consignacion).empty();
             document.getElementById(id).outerHTML = '<button id="btn_cancelar' + id_consignacion + '" onclick="cancelarCambiosIndividual(' + id_consignacion + ');" class="btn btn-danger btn-sm " ><i class="fas fa-times"></i></button>';
             $("#btn_devolver" + id_consignacion).empty();
             document.getElementById("btn_devolver" + id_consignacion).outerHTML = '<a href="#" id="btn_devolver' + id_consignacion + '" class="btn btn-warning btn-sm disabled" ><i class="fas fa-ban"></i></a>';
@@ -447,9 +447,10 @@ function consignacionesByCedulaCaja() {
                     $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + observa + imagen + '</tr>');
                     contador = contador + 1;
                 } else {
+                    var devolver = '<button  id="btn_devolver' + value.idConsignacion + '" onclick="abrirModalDevolucion(' + value.idConsignacion + ', this.id);" class="btn btn-warning btn-sm"><i class="fas fa-backward"></i></button>';
                     var observa = '<a href="#" id="btn_observa' + value.idConsignacion + '" onclick="abrirModalObservacionesCaja(' + value.idConsignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
                     var imagen = '<a href="#" id="btn_image' + value.idConsignacion + '" onclick="abrirModalImagen(' + value.idConsignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></a>';
-                    var accion = '<td><a href="#" id="btn_aplicar' + value.idConsignacion + '" onclick="aplicarConsignacion(' + value.idConsignacion + ', this.id);" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>' + observa + imagen + '</td>';
+                    var accion = '<td><a href="#" id="btn_aplicar_' + value.idConsignacion + '" onclick="aplicarConsignacion(' + value.idConsignacion + ', this.id);" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>'+ devolver + observa + imagen + '</td>';
                     $("#dataTable").append('<tr> <td>' + contador + '</td><td>' + value.nombre_titular + '</td><td>' + value.numero_documento + '</td><td>' + value.num_recibo + '</td><td>' + value.fecha_pago + '</td><td>' + value.fecha_creacion + '</td><td>' + value.valor + '</td><td>' + value.nombre_estado + '</td><td>' + value.nombre_plataforma + '</td>' + accion + '</tr>');
                     contador = contador + 1;
                 }
@@ -577,7 +578,7 @@ function cancelarCambios() {
 
 }
 
-function cancelarCambiosIndividual(id_consignacion) {
+function cancelarCambiosIndividualDevolver(id_consignacion) {
     validarSession();
     $.ajax({
         method: "GET",
@@ -603,6 +604,65 @@ function cancelarCambiosIndividual(id_consignacion) {
             document.getElementById("btn_aplicar"+id_consignacion).outerHTML = '<a href="#" id="btn_aplicar_' + id_consignacion + '" onclick="aplicarConsignacion(' + id_consignacion + ', this.id);" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>';
             $("#btn_cancelar" + id_consignacion).empty();
             document.getElementById("btn_cancelar" + id_consignacion).outerHTML = '<button  id="btn_devolver' + id_consignacion + '" onclick="abrirModalDevolucion(' + id_consignacion + ', this.id);" class="btn btn-warning btn-sm"><i class="fas fa-backward"></i></button>';
+            $("#btn_observa" + id_consignacion).empty();
+            document.getElementById("btn_observa" + id_consignacion).outerHTML = '<button  id="btn_observa' + id_consignacion + '" onclick="abrirModalObservacionesCaja(' + id_consignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></button>';
+            $("#btn_image" + id_consignacion).empty();
+            document.getElementById("btn_image" + id_consignacion).outerHTML = '<button  id="btn_image' + id_consignacion + '" onclick="abrirModalImagen(' + id_consignacion + ')" class="btn btn-success btn-sm"><i class="fas fa-image"></i></button>';
+
+
+            
+            
+            
+            
+
+
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al Cancelar los Cambios',
+                text: 'Error Desconocido Reporte el Error',
+                footer: '<a href="">Why do I have this issue?</a>'
+            });
+        }
+
+
+
+
+        // imprimimos la respuesta
+    }).fail(function () {
+
+        window.location.replace("login.html");
+    }).always(function () {
+
+    });
+}
+
+function cancelarCambiosIndividual(id_consignacion) {
+    validarSession();
+    $.ajax({
+        method: "GET",
+        url: "ServletControladorConsignaciones2?accion=cancelarCambiosIndividual&idConsignacion=" + id_consignacion
+
+    }).done(function (data) {
+
+        var json = data;
+
+
+
+
+        if (json > 0) {
+            Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: 'Cambio Cancelado',
+                showConfirmButton: false,
+                timer: 2000
+            });
+
+            $("#btn_cancelar" + id_consignacion).empty();
+            document.getElementById("btn_cancelar"+id_consignacion).outerHTML = '<a href="#" id="btn_aplicar_' + id_consignacion + '" onclick="aplicarConsignacion(' + id_consignacion + ', this.id);" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></a>';
+            $("#btn_devolver" + id_consignacion).empty();
+            document.getElementById("btn_devolver" + id_consignacion).outerHTML = '<button  id="btn_devolver' + id_consignacion + '" onclick="abrirModalDevolucion(' + id_consignacion + ', this.id);" class="btn btn-warning btn-sm"><i class="fas fa-backward"></i></button>';
             $("#btn_observa" + id_consignacion).empty();
             document.getElementById("btn_observa" + id_consignacion).outerHTML = '<button  id="btn_observa' + id_consignacion + '" onclick="abrirModalObservacionesCaja(' + id_consignacion + ');" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></button>';
             $("#btn_image" + id_consignacion).empty();

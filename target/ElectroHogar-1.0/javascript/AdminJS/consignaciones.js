@@ -13,11 +13,11 @@ function abrirModalObservaciones() {
     var fecha = document.getElementById('dateCreacion').value;
     var sede = document.getElementById('sltBancoCartera').value;
     var file = document.getElementById('file').files;
-   
 
 
-   
-    if (recibo === "" || valor === "" || fecha === "" || sede === "" || file.length === 0 ) {
+
+
+    if (recibo === "" || valor === "" || fecha === "" || sede === "" || file.length === 0) {
 
         Swal.fire({
             icon: 'error',
@@ -146,56 +146,94 @@ function guardarConsignacionConObservacion() {
         });
     } else {
         validarSession();
-        var form = document.getElementById('formConsignacion');
-        var formData = new FormData(form);
-
-
-        $.ajax({
-            method: "POST",
-            url: "ServletControladorCartera?accion=guardarConsignacion",
-            data: formData,
-            processData: false,
-            contentType: false
-
-        }).done(function (data) {
-
-            var idConsignacion = data;
-
-
-
-            if (idConsignacion !== 0) {
-
-                crearObservacion(obser, idConsignacion);
-
-
-
-
-
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error al guardar la consignacion',
-                    text: 'No se logro guardar la consignacion, por favor revise bien la informacion o reporte el error',
-                    footer: '<a href="">Why do I have this issue?</a>'
-                });
-            }
-
-
-
-
-            // imprimimos la respuesta
-        }).fail(function () {
-
-            window.location.replace("login.html");
-        }).always(function () {
-
-        });
-
-
-
-
+        validarExistencia();
+//        var form = document.getElementById('formConsignacion');
+//        var formData = new FormData(form);
+//
+//
+//        $.ajax({
+//            method: "POST",
+//            url: "ServletControladorCartera?accion=guardarConsignacion",
+//            data: formData,
+//            processData: false,
+//            contentType: false
+//
+//        }).done(function (data) {
+//
+//            var idConsignacion = data;
+//
+//
+//
+//            if (idConsignacion !== 0) {
+//
+//                crearObservacion(obser, idConsignacion);
+//
+//            } else {
+//                Swal.fire({
+//                    icon: 'error',
+//                    title: 'Error al guardar la consignacion',
+//                    text: 'No se logro guardar la consignacion, por favor revise bien la informacion o reporte el error',
+//                    footer: '<a href="">Why do I have this issue?</a>'
+//                });
+//            }
+//
+//            // imprimimos la respuesta
+//        }).fail(function () {
+//
+//            window.location.replace("login.html");
+//        }).always(function () {
+//
+//        });
 
     }
+}
+
+function validarExistencia() {
+    var datos = {};
+    datos.valor = document.getElementById('txtValor').value;
+    datos.fecha = document.getElementById('dateCreacion').value;
+
+    $.ajax({
+        method: "GET",
+        url: "ServletControladorConsignaciones2?accion=validarConsignacion",
+        data:datos,
+        dataType:'JSON'
+        
+
+    }).done(function (data) {
+
+        var dato = data;
+
+        if (dato > 0) {
+            Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: 'Consignacion Guardada Exitosamente',
+                showConfirmButton: false,
+                timer: 2000
+
+
+            });
+
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al guardar la consignacion',
+                text: 'No se logro guardar la consignacion, por favor revise bien la informacion o reporte el error',
+                footer: '<a href="">Why do I have this issue?</a>'
+            });
+        }
+
+
+
+
+        // imprimimos la respuesta
+    }).fail(function () {
+
+        window.location.replace("login.html");
+    }).always(function () {
+
+    });
 }
 
 function crearObservacion(obser, idConsignacion) {
